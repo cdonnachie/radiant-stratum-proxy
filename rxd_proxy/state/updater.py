@@ -30,19 +30,21 @@ async def update_once(state, settings, http: ClientSession, force_update: bool =
     state.version = version_int
 
     # Store prevHash - Radiant uses standard Bitcoin-style prevhash
-    # Convert hex to bytes in little-endian format
-    prev_hash_bytes = bytes.fromhex(prev_hash_hex)[::-1]  # Convert BE hex to LE bytes
+    # The RPC gives us the hash in BE hex format (how hashes are displayed)
+    prev_hash_be_bytes = bytes.fromhex(prev_hash_hex)  # Raw BE bytes
     
-    # For stratum, we need the prevhash split into 4-byte words, each word byte-swapped
-    prevhash_words_le = []
-    prevhash_words_be = []
+    # For the actual 80-byte header, we need LE bytes (simple reversal)
+    prev_hash_le_bytes = prev_hash_be_bytes[::-1]  # Reverse for header building
+    state.prevHash_header = prev_hash_le_bytes  # LE bytes for header building
+    
+    # For stratum mining.notify: word-swap the LE bytes (Bitcoin stratum protocol)
+    prevhash_words_swapped = []
     for i in range(0, 32, 4):  # 32 bytes total, 4 bytes per word
-        word = prev_hash_bytes[i : i + 4]
-        prevhash_words_be.append(word)
-        prevhash_words_le.append(word[::-1])
+        word = prev_hash_le_bytes[i : i + 4]
+        prevhash_words_swapped.append(word[::-1])  # Swap each word's endianness
 
-    state.prevHash_be = b"".join(prevhash_words_be)
-    state.prevHash_le = b"".join(prevhash_words_le)
+    state.prevHash_be = prev_hash_be_bytes  # Original BE bytes
+    state.prevHash_le = b"".join(prevhash_words_swapped)  # Word-swapped for stratum notification
 
     new_block = state.height == -1 or state.height != height_int
     if new_block:

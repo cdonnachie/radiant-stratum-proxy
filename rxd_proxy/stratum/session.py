@@ -632,7 +632,7 @@ class StratumSession(RPCSession):
         coinbase2_nowit_snapshot = state.coinbase2_nowit
         merkle_branches_snapshot = list(state.merkle_branches)
         version_snapshot = state.version
-        prevHash_be_snapshot = state.prevHash_be
+        prevHash_header_snapshot = state.prevHash_header  # LE bytes for header building
         bits_le_snapshot = state.bits_le
 
         if job_id != hex(state.job_counter)[2:]:
@@ -661,20 +661,29 @@ class StratumSession(RPCSession):
 
         ntime_le = bytes.fromhex(ntime_hex)[::-1]
         nonce_le = bytes.fromhex(nonce_hex)[::-1]
+        
+        # Debug: Log header components
+        self.logger.debug(f"Header build - version: {version_snapshot}, prevHash_header: {prevHash_header_snapshot.hex()}")
+        self.logger.debug(f"Header build - merkle_root_le: {merkle_root_le.hex()}, ntime_le: {ntime_le.hex()}, bits_le: {bits_le_snapshot.hex()}, nonce_le: {nonce_le.hex()}")
+        
         header80 = build_header80_le(
             version_snapshot,
-            prevHash_be_snapshot,
+            prevHash_header_snapshot,  # Use LE bytes for header (not word-swapped)
             merkle_root_le,
             ntime_le,
             bits_le_snapshot,
             nonce_le,
         )
 
+        self.logger.debug(f"Header80 ({len(header80)} bytes): {header80.hex()}")
+
         block_hash = dsha256(header80)[::-1]
 
         # Calculate SHA512/256d PoW hash for Radiant
         pow_digest_le = radiant_pow(header80)
+        self.logger.debug(f"POW hash (LE): {pow_digest_le.hex()}")
         hnum = int.from_bytes(pow_digest_le, "little")
+        self.logger.debug(f"Hash as int: {hnum}")
 
         # Check RXD target
         target_int = int(state.target, 16)

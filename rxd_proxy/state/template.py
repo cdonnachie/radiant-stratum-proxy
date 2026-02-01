@@ -12,8 +12,9 @@ class TemplateState:
     target: Optional[str] = None
     headerHash: Optional[str] = None
     version: int = -1
-    prevHash_le: Optional[bytes] = None
-    prevHash_be: Optional[bytes] = None
+    prevHash_le: Optional[bytes] = None  # Word-swapped for stratum notifications
+    prevHash_be: Optional[bytes] = None  # Original BE bytes
+    prevHash_header: Optional[bytes] = None  # LE bytes for header building (simple reversal)
     externalTxs: List[str] = field(default_factory=list)
     coinbase_tx: Optional[bytes] = None
     coinbase_txid: Optional[bytes] = None

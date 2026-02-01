@@ -990,9 +990,9 @@ async def get_earnings_estimate():
 
         # Get RXD difficulty from target or RPC
         rxd_difficulty = 0.0
-        if state.rxd_original_target:
+        if state.target:
             try:
-                rxd_target_int = int(state.rxd_original_target, 16)
+                rxd_target_int = int(state.target, 16)
                 rxd_difficulty = target_to_diff1(rxd_target_int)
             except Exception as e:
                 logger.debug(f"Failed to compute RXD difficulty from target: {e}")

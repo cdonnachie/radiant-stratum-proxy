@@ -21,28 +21,23 @@ Choose your setup method:
 
 **Prerequisites:** Docker and Docker Compose installed
 
-1. **Place Linux binaries**:
+The Docker setup automatically builds Radiant from source - no need to download binaries!
 
-   ```bash
-   # Copy Linux x86_64 binaries (NOT Windows/macOS)
-   binaries/radiant/radiantd
-   binaries/radiant/radiant-cli
-   ```
-
-2. **Configure environment**:
+1. **Configure environment**:
 
    ```bash
    cp .env.example .env
    # Edit .env - set RPC password
    ```
 
-3. **Start services**:
+2. **Start services** (first build takes ~10-15 minutes to compile Radiant):
 
    ```bash
    docker compose up -d
    docker compose logs -f stratum-proxy  # Watch logs
    ```
-
+   **Note**: First build compiles Radiant from source (https://github.com/Radiant-Core/Radiant-Core). 
+   Subsequent starts are instant since the image is cached.
 4. **Connect miner**:
    - Server: `localhost:54321`
    - Username: Your Radiant address
@@ -157,9 +152,9 @@ docker compose logs -f stratum-proxy
 
 **Miner can't connect**: Check firewall, verify STRATUM_PORT is correct
 
-**Binary format error**: Must use Linux ELF x86_64 binaries for Docker
-
 **Low hashrate**: Adjust `SHARE_DIFFICULTY_DIVISOR` for more frequent feedback
+
+**Build fails**: Ensure Docker has enough memory (4GB+ recommended for compilation)
 
 ## Advanced
 
@@ -217,49 +212,44 @@ MIT License - See LICENSE file
 | `LOG_LEVEL`                | Logging level (DEBUG, INFO, WARNING, ERROR)            | INFO                       |
 | `SHOW_JOBS`                | Show job updates in logs                               | false                      |
 
-## Binary Setup
+## Building from Source
 
-This setup uses local binaries instead of pre-built Docker images, giving you complete control over the node version.
+Docker automatically builds Radiant from source using https://github.com/cdonnachie/Radiant-Core (a maintained fork).
 
-### Required Binaries
+### Build Configuration
 
-Place the following files in the `binaries/radiant/` directory:
+You can specify a different branch or tag by modifying the build arg in `docker-compose.yml`:
 
-- `radiantd` - The main daemon
-- `radiant-cli` - CLI client
+```yaml
+radiant:
+  build:
+    context: .
+    dockerfile: Dockerfile.radiant
+    args:
+      RADIANT_VERSION: master  # or a specific tag like v1.0.0
+```
 
-### Binary Requirements
+### Manual Build (for native installs)
 
-⚠️ **Critical**: Only Linux binaries work with Docker containers!
-
-- **Platform**: Linux x86_64 ELF binaries (NOT Windows .exe or macOS binaries)
-- **Base System**: Ubuntu 24.04 compatible
-- **glibc Version**: 2.36+ support (Ubuntu 24.04 provides glibc 2.39)
-- **Executable permissions**: Set automatically by Docker
-
-### Getting Binaries
-
-Download from the official Radiant Node releases:
-https://github.com/radiantblockchain/radiant-node/releases
-
-### Verification
-
-Check if binaries are correct format:
+If running without Docker, build Radiant manually:
 
 ```bash
-file binaries/radiant/radiantd
+# Install dependencies
+sudo apt-get install build-essential cmake ninja-build libboost-all-dev \
+    libevent-dev libssl-dev libdb++-dev libminiupnpc-dev libzmq3-dev
+
+# Clone and build
+git clone https://github.com/cdonnachie/Radiant-Core.git
+cd Radiant-Core
+mkdir build && cd build
+cmake -GNinja .. -DBUILD_RADIANT_QT=OFF
+ninja
+
+# Binaries are in build/src/
+# - radiantd
+# - radiant-cli
+# - radiant-tx
 ```
-
-**Expected Output:**
-
-```
-binaries/radiant/radiantd: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 3.2.0, stripped
-```
-
-❌ **Wrong formats** (will NOT work):
-
-- Windows: `PE32+ executable (console) x86-64, for MS Windows`
-- macOS: `Mach-O 64-bit executable x86_64`
 
 ### Services
 
@@ -451,21 +441,23 @@ You can interact with the blockchain node using RPC commands:
 
 **Radiant Commands:**
 
+> **Note:** The `-u radiant` flag is required to run as the radiant user, which has access to the RPC credentials in the configuration file.
+
 ```bash
 # Get mining information
-docker compose exec -it radiant radiant-cli getmininginfo
+docker compose exec -u radiant radiant radiant-cli getmininginfo
 
 # Get blockchain info
-docker compose exec -it radiant radiant-cli getblockchaininfo
+docker compose exec -u radiant radiant radiant-cli getblockchaininfo
 
 # Get wallet info
-docker compose exec -it radiant radiant-cli getwalletinfo
+docker compose exec -u radiant radiant radiant-cli getwalletinfo
 
 # Generate new address
-docker compose exec -it radiant radiant-cli getnewaddress
+docker compose exec -u radiant radiant radiant-cli getnewaddress
 
 # Get network connections
-docker compose exec -it radiant radiant-cli getconnectioncount
+docker compose exec -u radiant radiant radiant-cli getconnectioncount
 ```
 
 #### Native Installation RPC Commands
@@ -507,16 +499,16 @@ listtransactions
 
    ```bash
    # Create a new wallet named "default"
-   docker compose exec -it radiant radiant-cli createwallet "default"
+   docker compose exec -u radiant radiant radiant-cli createwallet "default"
 
    # Load the wallet
-   docker compose exec -it radiant radiant-cli loadwallet "default"
+   docker compose exec -u radiant radiant radiant-cli loadwallet "default"
    ```
 
 2. **Generate Radiant Address**:
 
    ```bash
-   docker compose exec -it radiant radiant-cli getnewaddress
+   docker compose exec -u radiant radiant radiant-cli getnewaddress
    ```
 
 ### Monitoring
@@ -524,13 +516,13 @@ listtransactions
 Check blockchain sync status:
 
 ```bash
-docker compose exec -it radiant radiant-cli getblockchaininfo
+docker compose exec -u radiant radiant radiant-cli getblockchaininfo
 ```
 
 Check mining info:
 
 ```bash
-docker compose exec -it radiant radiant-cli getmininginfo
+docker compose exec -u radiant radiant radiant-cli getmininginfo
 ```
 
 ## Troubleshooting
@@ -568,14 +560,12 @@ radiant-stratum-proxy/
 ├── .env.example             # Example environment configuration
 ├── .gitignore               # Git ignore rules
 ├── Dockerfile               # Proxy container build
-├── Dockerfile.radiant       # Radiant daemon container
+├── Dockerfile.radiant       # Radiant node container (builds from source)
 ├── entrypoint.sh            # Proxy entrypoint script
 ├── entrypoint-radiant.sh    # Radiant node entrypoint script
 ├── requirements.txt         # Python dependencies
 ├── setup.sh / setup.bat     # Setup scripts for different platforms
 ├── health-check-radiant.sh  # Radiant node health check
-├── binaries/                # Cryptocurrency binaries directory
-│   └── radiant/             # Radiant binaries
 ├── config/                  # Configuration templates directory
 │   └── radiant.conf         # Radiant daemon config template
 ├── rxd_proxy/               # Proxy application package

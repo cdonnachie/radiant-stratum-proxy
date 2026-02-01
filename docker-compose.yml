@@ -3,6 +3,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.radiant
+      args:
+        RADIANT_VERSION: ${RADIANT_VERSION:-main}
     container_name: radiant-node
     restart: unless-stopped
     ports:

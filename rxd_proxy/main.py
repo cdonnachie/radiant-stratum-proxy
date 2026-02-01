@@ -21,6 +21,8 @@ def main():
         help="Log level (DEBUG, INFO, WARNING, ERROR, CRITICAL)",
     )
     p.add_argument("--debug-shares", action="store_true")
+    # Mining options
+    p.add_argument("--use-easier-target", action="store_true", help="Use easier target for shares")
     # ZMQ options
     p.add_argument("--enable-zmq", action="store_true", help="Enable ZMQ notifications")
     p.add_argument(

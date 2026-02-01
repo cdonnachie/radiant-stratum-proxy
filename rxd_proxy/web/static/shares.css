@@ -112,11 +112,11 @@
   align-items: center;
   gap: 6px;
   padding: 6px 10px;
-  background: rgba(217, 70, 239, 0.15);
-  border: 1px solid rgba(217, 70, 239, 0.4);
+  background: rgba(0, 242, 242, 0.15);
+  border: 1px solid rgba(0, 242, 242, 0.4);
   border-radius: 16px;
   font-size: 0.85em;
-  color: #d946ef;
+  color: #00F2F2;
   white-space: nowrap;
   animation: badgeSlideIn 0.2s ease-out;
 }
@@ -124,7 +124,7 @@
 .filter-badge .badge-close {
   background: none;
   border: none;
-  color: #d946ef;
+  color: #00F2F2;
   cursor: pointer;
   font-size: 1.1em;
   padding: 0 2px;
@@ -151,13 +151,13 @@
 }
 
 [data-theme="light"] .filter-badge {
-  background: rgba(217, 70, 239, 0.1);
-  border: 1px solid rgba(217, 70, 239, 0.3);
-  color: #d946ef;
+  background: rgba(0, 168, 222, 0.1);
+  border: 1px solid rgba(0, 168, 222, 0.3);
+  color: #007A74;
 }
 
 [data-theme="light"] .filter-badge .badge-close {
-  color: #d946ef;
+  color: #007A74;
 }
 
 .stats-panel {
@@ -261,7 +261,7 @@
 }
 
 .share-row.block {
-  background: rgba(16, 185, 129, 0.1);
+  background: rgba(0, 122, 116, 0.1);
 }
 
 .share-row.rejected {
@@ -277,7 +277,7 @@
 }
 
 .status-accepted {
-  background: rgba(16, 185, 129, 0.3);
+  background: rgba(0, 122, 116, 0.3);
   color: var(--badge-accepted);
 }
 

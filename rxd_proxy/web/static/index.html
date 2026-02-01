@@ -4,17 +4,22 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Radiant Solo Mining Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/dashboard.css" />
-    <link rel="icon" type="image/png" href="/static/radiant-logo.png" />
+    <link rel="icon" type="image/png" href="/static/radiant-logo-darkmode.png" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
   </head>
   <body>
     <div class="container">
       <h1>
         <img
-          src="/static/radiant-logo.png"
+          src="/static/radiant-logo-darkmode.png"
           alt="RXD"
-          class="logo"
+          class="logo theme-logo"
+          data-dark="/static/radiant-logo-darkmode.png"
+          data-light="/static/radiant-logo-lightmode.png"
           onerror="this.style.display='none'"
         />
         Radiant Solo Mining Dashboard
@@ -30,7 +35,7 @@
           <h3 style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
             <span>Total Hashrate</span>
             <label style="font-size: 0.55em; display: flex; align-items: center; gap: 4px; cursor: pointer; opacity: 0.8;">
-              <input type="checkbox" id="mode-toggle-hashrate" style="accent-color: #05a532; cursor: pointer" />
+              <input type="checkbox" id="mode-toggle-hashrate" style="accent-color: #00A8DE; cursor: pointer" />
               <span title="Toggle between EMA (smoothed) and Instant (raw) aggregate hashrate">Instant</span>
             </label>
           </h3>
@@ -69,8 +74,8 @@
 
         <div class="stat-card rxd-blocks-card" title="Blocks found in the last 24h and all-time total (accepted only)">
           <h3>
-            <img src="/static/radiant-logo.png" alt="RXD" class="chain-logo" onerror="this.style.display='none'" />
-            RXD Blocks
+            <img src="/static/radiant-logo-darkmode.png" alt="RXD" class="chain-logo theme-logo" data-dark="/static/radiant-logo-darkmode.png" data-light="/static/radiant-logo-lightmode.png" onerror="this.style.display='none'" />
+            Blocks
           </h3>
           <div class="value" id="rxd-blocks">0</div>
           <div class="unit">24h</div>
@@ -91,8 +96,8 @@
 
         <div class="stat-card rxd-earnings-card" id="earnings-card" style="display: none; position: relative; cursor: help; overflow: visible;">
           <h3>
-            <img src="/static/radiant-logo.png" alt="RXD" class="chain-logo" onerror="this.style.display='none'" />
-            Est RXD Earnings
+            <img src="/static/radiant-logo-darkmode.png" alt="RXD" class="chain-logo theme-logo" data-dark="/static/radiant-logo-darkmode.png" data-light="/static/radiant-logo-lightmode.png" onerror="this.style.display='none'" />
+            Earnings
           </h3>
           <div class="value" id="earnings-daily-usd" style="font-size: 1.8em">—</div>
           <div class="unit">Daily USD</div>
@@ -111,8 +116,8 @@
 
         <div class="stat-card rxd-price-card" title="Current RXD market price from CoinGecko" id="price-card" style="display: none">
           <h3>
-            <img src="/static/radiant-logo.png" alt="RXD" class="chain-logo" onerror="this.style.display='none'" />
-            RXD Price
+            <img src="/static/radiant-logo-darkmode.png" alt="RXD" class="chain-logo theme-logo" data-dark="/static/radiant-logo-darkmode.png" data-light="/static/radiant-logo-lightmode.png" onerror="this.style.display='none'" />
+            Price
           </h3>
           <div class="value" id="price-usd" style="font-size: 1.8em">—</div>
           <div class="unit">USD</div>
@@ -125,28 +130,28 @@
           </div>
         </div>
 
-        <div class="stat-card rxd-network-card" title="Current RXD blockchain height">
+        <div class="stat-card rxd-network-card" title="Current blockchain height">
           <h3>
-            <img src="/static/radiant-logo.png" alt="RXD" class="chain-logo" onerror="this.style.display='none'" />
-            RXD Network
+            <img src="/static/radiant-logo-darkmode.png" alt="RXD" class="chain-logo theme-logo" data-dark="/static/radiant-logo-darkmode.png" data-light="/static/radiant-logo-lightmode.png" onerror="this.style.display='none'" />
+            Block Height
           </h3>
           <div class="value" id="rxd-height" style="font-size: 1.8em">—</div>
-          <div class="unit">Block Height</div>
+          <div class="unit">Network</div>
         </div>
 
-        <div class="stat-card rxd-difficulty-card" title="Current RXD network target difficulty">
+        <div class="stat-card rxd-difficulty-card" title="Current network target difficulty">
           <h3>
-            <img src="/static/radiant-logo.png" alt="RXD" class="chain-logo" onerror="this.style.display='none'" />
-            RXD Difficulty
+            <img src="/static/radiant-logo-darkmode.png" alt="RXD" class="chain-logo theme-logo" data-dark="/static/radiant-logo-darkmode.png" data-light="/static/radiant-logo-lightmode.png" onerror="this.style.display='none'" />
+            Difficulty
           </h3>
           <div class="value" id="rxd-difficulty" style="font-size: 1.8em">—</div>
-          <div class="unit">Target Difficulty</div>
+          <div class="unit">Network Target</div>
         </div>
       </div>
 
       <div class="toolbar">
         <label class="worker-toggle" style="display: flex; align-items: center; gap: 8px; font-size: 0.8em; letter-spacing: 0.5px; opacity: 0.85; cursor: pointer;">
-          <input type="checkbox" id="worker-mode-toggle" checked style="accent-color: #05a532; width: 16px; height: 16px; cursor: pointer;" />
+          <input type="checkbox" id="worker-mode-toggle" checked style="accent-color: #00A8DE; width: 16px; height: 16px; cursor: pointer;" />
           <span>Compact worker names</span>
         </label>
         <span style="font-size: 0.7em; opacity: 0.55">(Toggle to show full wallet.worker identifiers)</span>
@@ -168,7 +173,7 @@
           <div class="stats-grid" style="margin-top: 16px">
             <div class="stat-card rxd-network-card">
               <h3>
-                <img src="/static/radiant-logo.png" alt="RXD" class="chain-logo" onerror="this.style.display='none'" />
+                <img src="/static/radiant-logo-darkmode.png" alt="RXD" class="chain-logo theme-logo" data-dark="/static/radiant-logo-darkmode.png" data-light="/static/radiant-logo-lightmode.png" onerror="this.style.display='none'" />
                 Radiant Node
               </h3>
               <div style="margin-top: 12px; font-size: 0.85em; line-height: 1.6">
@@ -197,7 +202,7 @@
       <div class="section">
         <h2>
           <span class="live-indicator"></span>Active Miners
-          <span id="vardiff-badge" class="badge" style="display: none; margin-left: 12px; font-size: 0.6em; padding: 4px 10px; background: #057c32; color: #fff; vertical-align: middle;" title="Variable difficulty is enabled">VarDiff: Enabled</span>
+          <span id="vardiff-badge" class="badge" style="display: none; margin-left: 12px; font-size: 0.6em; padding: 4px 10px; background: #007A74; color: #fff; vertical-align: middle;" title="Variable difficulty is enabled">VarDiff: Enabled</span>
         </h2>
         <div class="table-wrapper">
           <table id="miners-table" aria-label="Active Miners">
@@ -260,7 +265,7 @@
         </div>
         <div class="subsection rxd-blocks-card">
           <h3 style="margin: 0 0 10px 0; display: flex; align-items: center; gap: 6px; font-size: 1em;">
-            <span class="badge badge-rxd"><img src="/static/radiant-logo.png" alt="" class="chain-logo" onerror="this.style.display='none'" />RXD</span>
+            <span class="badge badge-rxd"><img src="/static/radiant-logo-darkmode.png" alt="" class="chain-logo theme-logo" data-dark="/static/radiant-logo-darkmode.png" data-light="/static/radiant-logo-lightmode.png" onerror="this.style.display='none'" />RXD</span>
             <span style="opacity: 0.75; font-weight: 500">Blocks</span>
           </h3>
           <div class="table-wrapper">
@@ -335,45 +340,34 @@
       </div>
 
       <div class="section">
-        <h2>Payout Address</h2>
-        <div class="table-wrapper">
-          <table aria-label="Payout Addresses">
-            <thead>
-              <tr>
-                <th>Chain</th>
-                <th>Address</th>
-                <th>Source</th>
-              </tr>
-            </thead>
-            <tbody id="payouts-body">
-              <tr><td colspan="3" class="no-data">Loading...</td></tr>
-            </tbody>
-          </table>
+        <h2>Coinbase Payout Address</h2>
+        <div id="payout-info" style="padding: 12px 16px; background: rgba(255,255,255,0.03); border-radius: 6px;">
+          <span class="no-data">Waiting for first miner to connect...</span>
         </div>
       </div>
 
       <div class="status-bar" id="status-bar" style="margin-top: 30px; padding: 16px 24px; background: rgba(255, 255, 255, 0.05); border-radius: 8px; display: flex; flex-wrap: wrap; gap: 24px; align-items: center; font-size: 0.85em; border: 1px solid rgba(255, 255, 255, 0.1);">
         <div style="font-weight: 600; opacity: 0.7; margin-right: 8px">System Configuration:</div>
         <div id="status-vardiff" class="status-item" style="display: none">
-          <span style="color: #05a532; margin-right: 4px">●</span>
+          <span style="color: #00F2F2; margin-right: 4px">●</span>
           <span title="Variable difficulty is enabled">VarDiff</span>
           <span class="status-detail" style="opacity: 0.6; margin-left: 6px; font-size: 0.9em"></span>
         </div>
         <div id="status-zmq" class="status-item" style="display: none">
-          <span style="color: #05a532; margin-right: 4px">●</span>
+          <span style="color: #00F2F2; margin-right: 4px">●</span>
           <span title="ZeroMQ block notifications enabled">ZMQ</span>
         </div>
         <div id="status-notifications" class="status-item" style="display: none">
-          <span style="color: #05a532; margin-right: 4px">●</span>
+          <span style="color: #00F2F2; margin-right: 4px">●</span>
           <span>Notifications</span>
           <span class="status-detail" style="opacity: 0.6; margin-left: 6px; font-size: 0.9em"></span>
         </div>
         <div id="status-database" class="status-item" style="display: none">
-          <span style="color: #05a532; margin-right: 4px">●</span>
+          <span style="color: #00F2F2; margin-right: 4px">●</span>
           <span title="Database logging enabled">Database</span>
         </div>
         <div id="status-stratum" class="status-item" style="display: none">
-          <span style="color: #05a532; margin-right: 4px">●</span>
+          <span style="color: #00F2F2; margin-right: 4px">●</span>
           <span title="Stratum server port">Port:</span>
           <span class="status-detail" style="margin-left: 4px; font-weight: 500">—</span>
         </div>
@@ -397,8 +391,31 @@
         if (miner.hashrate_display) return miner.hashrate_display;
         const mhs = miner.hashrate_mhs || 0;
         if (mhs === 0) return "0.00 H/s";
+        if (mhs >= 1000000) return (mhs / 1000000).toFixed(2) + " TH/s";
         if (mhs >= 1000) return (mhs / 1000).toFixed(2) + " GH/s";
-        return mhs.toFixed(2) + " MH/s";
+        if (mhs >= 1) return mhs.toFixed(2) + " MH/s";
+        if (mhs >= 0.001) return (mhs * 1000).toFixed(2) + " KH/s";
+        return (mhs * 1000000).toFixed(2) + " H/s";
+      }
+
+      function formatHashrateValue(hs) {
+        // Format raw H/s value with appropriate unit
+        if (hs === 0) return { value: 0, unit: "H/s", divisor: 1 };
+        if (hs >= 1e12) return { value: hs / 1e12, unit: "TH/s", divisor: 1e12 };
+        if (hs >= 1e9) return { value: hs / 1e9, unit: "GH/s", divisor: 1e9 };
+        if (hs >= 1e6) return { value: hs / 1e6, unit: "MH/s", divisor: 1e6 };
+        if (hs >= 1e3) return { value: hs / 1e3, unit: "KH/s", divisor: 1e3 };
+        return { value: hs, unit: "H/s", divisor: 1 };
+      }
+
+      function formatDifficulty(diff) {
+        if (diff == null) return "—";
+        if (diff >= 1e12) return (diff / 1e12).toFixed(2) + " T";
+        if (diff >= 1e9) return (diff / 1e9).toFixed(2) + " G";
+        if (diff >= 1e6) return (diff / 1e6).toFixed(2) + " M";
+        if (diff >= 1e3) return (diff / 1e3).toFixed(2) + " K";
+        if (diff >= 1) return diff.toFixed(2);
+        return diff.toFixed(8);
       }
 
       function formatUptime(seconds) {
@@ -477,7 +494,7 @@
           const response = await fetch("/api/daemon-status");
           if (!response.ok) throw new Error("Failed to fetch daemon status");
           const data = await response.json();
-          updateDaemonCard("rxd", data.rxd);
+          updateDaemonCard("rxd", data.RXD);
         } catch (error) {
           console.error("Error updating daemon status:", error);
           const statusEl = document.getElementById("rxd-daemon-status");
@@ -490,7 +507,7 @@
         const statusEl = document.getElementById(`${chain}-daemon-status`);
         if (statusEl) {
           statusEl.textContent = info.status || "—";
-          if (info.status === "Connected") statusEl.style.color = "#2ecc71";
+          if (info.status === "Connected") statusEl.style.color = "#00F2F2";
           else if (info.status === "Timeout" || info.status === "Offline") statusEl.style.color = "#ff6b6b";
           else statusEl.style.color = "#f1c40f";
         }
@@ -503,6 +520,15 @@
         if (connEl) connEl.textContent = info.connections !== undefined ? `${info.connections}` : "—";
         const versionEl = document.getElementById(`${chain}-version`);
         if (versionEl) versionEl.textContent = info.version || "—";
+        
+        // Also update the RXD Network card with daemon height if main stats show -1 or Syncing
+        if (chain === "rxd" && info.blocks) {
+          const heightEl = document.getElementById("rxd-height");
+          if (heightEl && (heightEl.textContent === "—" || heightEl.textContent === "-1" || heightEl.textContent === "Syncing...")) {
+            heightEl.textContent = info.blocks;
+            heightEl.title = `RXD blockchain height: ${info.blocks} (from daemon status)`;
+          }
+        }
       }
 
       let workerCompactMode = true;
@@ -567,13 +593,13 @@
           const relErr = data.total_rel_error_est ?? 1.0;
           const sharesWin = data.total_shares_in_window ?? 0;
           const confEl = document.getElementById("total-hashrate-conf");
-          if (sharesWin > 0) { const pct = (relErr * 100).toFixed(relErr * 100 >= 10 ? 1 : 2); confEl.textContent = `±${pct}%`; confEl.style.display = "inline-block"; let bg; if (relErr < 0.05) bg = "#057c32"; else if (relErr < 0.15) bg = "#a66b00"; else bg = "#a60000"; confEl.style.background = bg; } else confEl.style.display = "none";
+          if (sharesWin > 0) { const pct = (relErr * 100).toFixed(relErr * 100 >= 10 ? 1 : 2); confEl.textContent = `±${pct}%`; confEl.style.display = "inline-block"; let bg; if (relErr < 0.05) bg = "#007A74"; else if (relErr < 0.15) bg = "#a66b00"; else bg = "#a60000"; confEl.style.background = bg; } else confEl.style.display = "none";
           document.getElementById("hashrate-subtext").textContent = instantMode ? "Instant window-based aggregate hashrate" : "EMA-smoothed aggregate hashrate";
           document.getElementById("miner-count").textContent = data.miner_count;
           const tbody = document.getElementById("miners-body");
           if (pageMiners.length === 0) tbody.innerHTML = '<tr><td colspan="6" class="no-data">No miners connected</td></tr>';
           else tbody.innerHTML = pageMiners.map((miner) => {
-            const diffCell = miner.assigned_difficulty != null ? miner.assigned_difficulty.toFixed(8) : "—";
+            const diffCell = miner.assigned_difficulty != null ? formatDifficulty(miner.assigned_difficulty) : "—";
             let shareIntvlDisplay = "—";
             if (miner.share_blended_interval != null && miner.share_blended_interval > 0 && miner.target_interval) {
               const blended = miner.share_blended_interval, target = miner.target_interval, pct = (blended / target) * 100;
@@ -625,8 +651,10 @@
           try {
             const height = data.current_height_rxd, diff = data.current_rxd_difficulty;
             const heightEl = document.getElementById("rxd-height"), diffEl = document.getElementById("rxd-difficulty");
-            if (heightEl && height != null) { heightEl.textContent = height; heightEl.title = `RXD blockchain height: ${height}`; }
-            if (diffEl && diff != null) { diffEl.textContent = diff.toFixed(8); diffEl.title = `RXD network difficulty: ${diff}`; }
+            // Only update height from stats if it's valid (>= 0) - otherwise daemon status will populate it
+            if (heightEl && height != null && height >= 0) { heightEl.textContent = height; heightEl.title = `RXD blockchain height: ${height}`; }
+            else if (heightEl && (heightEl.textContent === "—" || heightEl.textContent === "-1")) { heightEl.textContent = "Syncing..."; heightEl.title = "Node is still syncing - height will show when sync completes"; }
+            if (diffEl && diff != null && diff > 0) { diffEl.textContent = formatDifficulty(diff); diffEl.title = `RXD network difficulty: ${diff.toLocaleString()}`; }
           } catch (e) {}
           if (data.shares_since_last_block != null) {
             document.getElementById("shares-since-block").textContent = data.shares_since_last_block.toLocaleString();
@@ -706,17 +734,19 @@
         } catch (error) { console.error("Error fetching best shares:", error); document.getElementById("best-shares-body").innerHTML = '<tr><td colspan="5" class="no-data">Error loading best shares</td></tr>'; }
       }
 
-      async function updatePayouts() {
+      async function updatePayoutAddress() {
         try {
           const response = await fetch("/api/payouts");
           const data = await response.json();
-          const tbody = document.getElementById("payouts-body");
-          if (!data.addresses || data.addresses.length === 0) { tbody.innerHTML = '<tr><td colspan="3" class="no-data">No payout addresses configured</td></tr>'; return; }
-          tbody.innerHTML = data.addresses.map((addr) => {
-            const explorerUrl = "https://radiantexplorer.com/address/" + addr.address;
-            return `<tr><td><span class="badge badge-rxd">${addr.chain}</span></td><td class="addr-cell"><div class="copy-wrap" title="${addr.address}"><a class="hash-link" href="${explorerUrl}" target="_blank" rel="noopener">${addr.address}</a><button class="copy-btn" onclick="copyToClipboard('${addr.address}', this)">Copy</button></div></td><td>${addr.source}</td></tr>`;
-          }).join("");
-        } catch (error) { console.error("Error fetching payouts:", error); document.getElementById("payouts-body").innerHTML = '<tr><td colspan="3" class="no-data">Error loading payout addresses</td></tr>'; }
+          const container = document.getElementById("payout-info");
+          if (data.rxd_address) {
+            const explorerUrl = "https://radiantexplorer.com/address/" + data.rxd_address;
+            const sourceText = data.rxd_source === "first_miner" ? "Set by first connected miner" : data.rxd_source;
+            container.innerHTML = `<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;"><span class="badge badge-rxd">RXD</span><div class="copy-wrap" title="${data.rxd_address}"><a class="hash-link" href="${explorerUrl}" target="_blank" rel="noopener">${data.rxd_address}</a><button class="copy-btn" onclick="copyToClipboard('${data.rxd_address}', this)">Copy</button></div><span style="opacity:0.6;font-size:0.85em">(${sourceText})</span></div>`;
+          } else {
+            container.innerHTML = '<span class="no-data">Waiting for first miner to connect...</span>';
+          }
+        } catch (error) { console.error("Error fetching payout address:", error); }
       }
 
       async function updateEarnings() {
@@ -766,7 +796,8 @@
         if (!btn) return;
         const root = document.documentElement;
         const stored = localStorage.getItem("dashboardTheme");
-        function setLabel() { const isLight = root.getAttribute("data-theme") === "light"; const iconSpan = btn.querySelector(".icon"); if (isLight) { btn.querySelector(".label")?.replaceChildren(document.createTextNode("Dark Mode")); if (iconSpan) iconSpan.textContent = "☀️"; } else { btn.querySelector(".label")?.replaceChildren(document.createTextNode("Light Mode")); if (iconSpan) iconSpan.textContent = "🌙"; } }
+        function updateLogos() { const isLight = root.getAttribute("data-theme") === "light"; document.querySelectorAll(".theme-logo").forEach(img => { const src = isLight ? img.dataset.light : img.dataset.dark; if (src) img.src = src; }); }
+        function setLabel() { const isLight = root.getAttribute("data-theme") === "light"; const iconSpan = btn.querySelector(".icon"); if (isLight) { btn.querySelector(".label")?.replaceChildren(document.createTextNode("Dark Mode")); if (iconSpan) iconSpan.textContent = "☀️"; } else { btn.querySelector(".label")?.replaceChildren(document.createTextNode("Light Mode")); if (iconSpan) iconSpan.textContent = "🌙"; } updateLogos(); }
         if (stored === "light") root.setAttribute("data-theme", "light"); else root.removeAttribute("data-theme");
         setLabel();
         btn.addEventListener("click", () => { const isLight = root.getAttribute("data-theme") === "light"; document.body.classList.remove("theme-fade"); void document.body.offsetWidth; document.body.classList.add("theme-fade"); if (isLight) { root.removeAttribute("data-theme"); localStorage.setItem("dashboardTheme", "dark"); } else { root.setAttribute("data-theme", "light"); localStorage.setItem("dashboardTheme", "light"); } setLabel(); });
@@ -779,17 +810,18 @@
 
       let difficultyChart = null, hashrateChart = null, currentDifficultyHours = 24, currentHashrateHours = 24;
 
-      function getChartColors() { const isLight = document.documentElement.getAttribute("data-theme") === "light"; return { rxdColor: "#0080ff", gridColor: isLight ? "rgba(0, 0, 0, 0.1)" : "rgba(255, 255, 255, 0.1)", textColor: isLight ? "#333" : "#ccc", legendColor: isLight ? "#333" : "#fff", backgroundColor: isLight ? "#f8f9fa" : "#1a1a2e" }; }
+      function getChartColors() { const isLight = document.documentElement.getAttribute("data-theme") === "light"; return { rxdColor: "#00A8DE", gridColor: isLight ? "rgba(0, 0, 0, 0.1)" : "rgba(255, 255, 255, 0.1)", textColor: isLight ? "#333" : "#ccc", legendColor: isLight ? "#333" : "#fff", backgroundColor: isLight ? "#f8f9fa" : "#1a1a2e" }; }
 
       async function updateDifficultyChart(hours) {
         currentDifficultyHours = hours;
         ["24h", "7d", "30d"].forEach((period) => { const btn = document.getElementById(`difficulty-${period}-btn`); if (btn) btn.classList.toggle("active-chart-btn", (period === "24h" && hours === 24) || (period === "7d" && hours === 168) || (period === "30d" && hours === 720)); });
         try {
-          const response = await fetch(`/api/difficulty/history?hours=${hours}`);
+          const response = await fetch(`/api/difficulty-history/rxd?hours=${hours}`);
           const data = await response.json();
           const colors = getChartColors();
-          const labels = data.points.map((p) => { const date = new Date(p.timestamp * 1000); if (hours <= 24) return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }); else return date.toLocaleDateString([], { month: "short", day: "numeric" }); });
-          const rxdDifficulties = data.points.map((p) => p.rxd_difficulty);
+          const points = data.data || [];
+          const labels = points.map((p) => { const date = new Date(p.timestamp * 1000); if (hours <= 24) return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }); else return date.toLocaleDateString([], { month: "short", day: "numeric" }); });
+          const rxdDifficulties = points.map((p) => p.difficulty);
           const ctx = document.getElementById("difficulty-chart").getContext("2d");
           if (difficultyChart) difficultyChart.destroy();
           Chart.defaults.color = colors.legendColor;
@@ -801,17 +833,20 @@
         currentHashrateHours = hours;
         ["24h", "7d", "30d"].forEach((period) => { const btn = document.getElementById(`hashrate-${period}-btn`); if (btn) btn.classList.toggle("active-chart-btn", (period === "24h" && hours === 24) || (period === "7d" && hours === 168) || (period === "30d" && hours === 720)); });
         try {
-          const response = await fetch(`/api/hashrate/history?hours=${hours}`);
+          const response = await fetch(`/api/hashrate-history?hours=${hours}`);
           const data = await response.json();
           const colors = getChartColors();
-          const points = data.points || [];
+          const points = data.data || [];
           const labels = points.map((p) => { const date = new Date(p.timestamp * 1000); if (hours <= 24) return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }); else return date.toLocaleDateString([], { month: "short", day: "numeric" }); });
-          const hashrates = points.map((p) => p.hashrate_khs);
+          const rawHashrates = points.map((p) => p.hashrate_hs);
+          const maxHashrate = rawHashrates.length > 0 ? Math.max(...rawHashrates) : 0;
+          const { unit, divisor } = formatHashrateValue(maxHashrate);
+          const hashrates = rawHashrates.map((h) => h / divisor);
           const avg = hashrates.length > 0 ? hashrates.reduce((a, b) => a + b, 0) / hashrates.length : 0;
           const ctx = document.getElementById("hashrate-chart").getContext("2d");
           if (hashrateChart) hashrateChart.destroy();
           Chart.defaults.color = colors.legendColor;
-          hashrateChart = new Chart(ctx, { type: "line", data: { labels: labels, datasets: [{ label: "Hashrate (KH/s)", data: hashrates, borderColor: colors.rxdColor, backgroundColor: colors.rxdColor + "25", borderWidth: 2.5, fill: true, tension: 0.4, pointRadius: 2, pointBackgroundColor: colors.rxdColor }, { label: `Average (${avg.toFixed(2)} KH/s)`, data: new Array(labels.length).fill(avg), borderColor: colors.textColor, borderWidth: 1, borderDash: [5, 5], fill: false, pointRadius: 0, tension: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, labels: { color: colors.legendColor } } }, scales: { y: { beginAtZero: true, grid: { color: colors.gridColor }, ticks: { color: colors.textColor, callback: function (value) { return value.toFixed(1) + " KH/s"; } } }, x: { grid: { color: colors.gridColor }, ticks: { color: colors.textColor, maxTicksLimit: 12 } } } } });
+          hashrateChart = new Chart(ctx, { type: "line", data: { labels: labels, datasets: [{ label: `Hashrate (${unit})`, data: hashrates, borderColor: colors.rxdColor, backgroundColor: colors.rxdColor + "25", borderWidth: 2.5, fill: true, tension: 0.4, pointRadius: 2, pointBackgroundColor: colors.rxdColor }, { label: `Average (${avg.toFixed(2)} ${unit})`, data: new Array(labels.length).fill(avg), borderColor: colors.textColor, borderWidth: 1, borderDash: [5, 5], fill: false, pointRadius: 0, tension: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, labels: { color: colors.legendColor } } }, scales: { y: { beginAtZero: true, grid: { color: colors.gridColor }, ticks: { color: colors.textColor, callback: function (value) { return value.toFixed(2) + " " + unit; } } }, x: { grid: { color: colors.gridColor }, ticks: { color: colors.textColor, maxTicksLimit: 12 } } } } });
         } catch (error) { console.error("Error updating hashrate chart:", error); }
       }
 
@@ -848,8 +883,8 @@
 
       // Initialize
       (function init() {
-        loadPaginationState(); updateMiners(); updateStats(); updateBlocks(); updateBestShares(); updatePayouts(); updateEarnings(); updateConfig(); updateDaemonStatus(); updateDisconnectedMiners(); updateDifficultyChart(24); updateHashrateChart(24);
-        setInterval(updateMiners, 5000); setInterval(updateStats, 10000); setInterval(updateBlocks, 30000); setInterval(updateBestShares, 30000); setInterval(updateEarnings, 60000); setInterval(updateDaemonStatus, 30000);
+        loadPaginationState(); updateMiners(); updateStats(); updateBlocks(); updateBestShares(); updatePayoutAddress(); updateEarnings(); updateConfig(); updateDaemonStatus(); updateDisconnectedMiners(); updateDifficultyChart(24); updateHashrateChart(24);
+        setInterval(updateMiners, 5000); setInterval(updateStats, 10000); setInterval(updateBlocks, 30000); setInterval(updateBestShares, 30000); setInterval(updatePayoutAddress, 30000); setInterval(updateEarnings, 60000); setInterval(updateDaemonStatus, 30000);
         setInterval(() => { updateDifficultyChart(currentDifficultyHours); updateHashrateChart(currentHashrateHours); }, 5 * 60 * 1000);
       })();
 

@@ -3,8 +3,8 @@
    THEME VARIABLES
    ============================================================= */
 :root {
-  --bg-start: #000;
-  --bg-end: #252525;
+  --bg-start: #000000;
+  --bg-end: #25252C;
   --text: #ffffff;
   --text-dim: rgba(255, 255, 255, 0.65);
   --card: rgba(255, 255, 255, 0);
@@ -15,24 +15,31 @@
   --btn-bg: rgba(255, 255, 255, 0.15);
   --btn-border: rgba(255, 255, 255, 0.3);
   --btn-bg-hover: rgba(255, 255, 255, 0.22);
-  /* Radiant brand colors - Magenta/Pink family */
-  --badge-rxd: #d946ef;
-  --badge-rxd-light: #ec4899;
-  --badge-rxd-silver: #b8b8b8;
-  --badge-rxd-dark: #be185d;
+  /* Radiant brand colors - Cyan/Teal family */
+  --badge-rxd: #00F2F2;
+  --badge-rxd-light: #7FE0FF;
+  --badge-rxd-medium: #00A8DE;
+  --badge-rxd-dark: #007A74;
+  --badge-rxd-darker: #004946;
+  /* Radiant blue accents */
+  --rxd-blue-1: #4495F2;
+  --rxd-blue-2: #4285F4;
+  --rxd-blue-3: #356FDB;
+  --rxd-blue-4: #2F5EC4;
+  --rxd-blue-5: #1F4495;
 
   /* Status badge colors */
-  --badge-accepted: #10b981;
+  --badge-accepted: #007A74;
   --badge-rejected: #e74c3c;
-  --shadow-card: 0 4px 15px rgba(201, 28, 190, 0.15);
+  --shadow-card: 0 4px 15px rgba(0, 242, 242, 0.12);
   --shadow-logo: 0 4px 15px rgba(0, 0, 0, 0.2);
   --radius: 16px;
-  --font: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  --font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --fast: 160ms ease;
 }
 [data-theme="light"] {
-  --bg-start: #f5f5f5;
-  --bg-end: #fefefe;
+  --bg-start: #EDEDED;
+  --bg-end: #FFFFFF;
   --text: #1a1f29;
   --text-dim: rgba(0, 0, 0, 0.55);
   --card: rgba(255, 255, 255, 0.85);
@@ -43,6 +50,11 @@
   --btn-bg: rgba(0, 0, 0, 0.06);
   --btn-border: rgba(0, 0, 0, 0.15);
   --btn-bg-hover: rgba(0, 0, 0, 0.12);
+  /* Darker cyan variants for light mode readability */
+  --badge-rxd: #00A8DE;
+  --badge-rxd-light: #00A8DE;
+  --badge-rxd-medium: #007A74;
+  --badge-accepted: #004946;
   --shadow-card: 0 6px 18px rgba(0, 0, 0, 0.08);
   --shadow-logo: 0 3px 10px rgba(0, 0, 0, 0.15);
 }
@@ -89,7 +101,7 @@ h1 {
   align-items: center;
   justify-content: center;
   gap: 18px;
-  letter-spacing: 0.5px;
+  letter-spacing: -0.02em;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.35);
 }
 .logo {
@@ -121,7 +133,7 @@ h1 {
 .nav-link {
   color: var(--text);
   text-decoration: none;
-  font-weight: 600;
+  font-weight: 500;
   font-size: 0.95em;
   padding: 8px 16px;
   border-radius: 6px;
@@ -136,8 +148,8 @@ h1 {
 
 .nav-link.active {
   opacity: 1;
-  color: #05a532;
-  border-bottom: 2px solid #05a532;
+  color: var(--badge-rxd);
+  border-bottom: 2px solid var(--badge-rxd);
 }
 
 .stats-grid {
@@ -176,10 +188,10 @@ h1 {
 }
 .stat-card h3 {
   font-size: 0.78em;
-  font-weight: 600;
+  font-weight: 500;
   margin: 0 0 8px;
   opacity: 0.75;
-  letter-spacing: 0.9px;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
   display: flex;
   align-items: center;
@@ -187,7 +199,7 @@ h1 {
 }
 .stat-card .value {
   font-size: 2.35em;
-  font-weight: 700;
+  font-weight: 600;
   line-height: 1;
   margin: 0 0 4px;
 }
@@ -221,7 +233,7 @@ h1 {
   align-items: center;
   gap: 10px;
   font-weight: 600;
-  letter-spacing: 0.5px;
+  letter-spacing: -0.01em;
 }
 
 /* Dual blocks layout for Recent Blocks section */
@@ -275,10 +287,10 @@ td {
 }
 th {
   background: var(--table-head);
-  font-weight: 600;
+  font-weight: 500;
   text-transform: uppercase;
   font-size: 0.65em;
-  letter-spacing: 1px;
+  letter-spacing: 0.05em;
   text-align: left;
 }
 tr:hover {
@@ -307,10 +319,10 @@ tr:hover {
     box-shadow: 0 0 0 0 var(--badge-rxd);
   }
   70% {
-    box-shadow: 0 0 0 10px rgba(217, 70, 239, 0);
+    box-shadow: 0 0 0 10px rgba(0, 242, 242, 0);
   }
   100% {
-    box-shadow: 0 0 0 0 rgba(217, 70, 239, 0);
+    box-shadow: 0 0 0 0 rgba(0, 242, 242, 0);
   }
 }
 .live-indicator {
@@ -328,8 +340,8 @@ tr:hover {
   padding: 4px 10px;
   border-radius: 18px;
   font-size: 0.7em;
-  font-weight: 600;
-  letter-spacing: 0.5px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
   line-height: 1;
   min-width: 60px;
 }
@@ -379,8 +391,8 @@ tr:hover {
   background: linear-gradient(
     135deg,
     var(--card) 0%,
-    rgba(217, 70, 239, 0.02) 50%,
-    rgba(217, 70, 239, 0.05) 100%
+    rgba(0, 242, 242, 0.02) 50%,
+    rgba(0, 242, 242, 0.05) 100%
   );
 }
 
@@ -464,7 +476,7 @@ tr:hover {
 }
 .maintenance-group .mini-option input[type="checkbox"],
 .maintenance-group .mini-option input[type="number"] {
-  accent-color: #05a532;
+  accent-color: var(--badge-rxd);
   font-size: 1em;
   padding: 2px 4px;
 }
@@ -559,25 +571,25 @@ tbody tr td a.hash-link {
 
 /* Active chart button styling */
 .toolbar-btn.active-chart-btn {
-  background: var(--badge-accepted);
+  background: var(--badge-rxd-dark);
   color: #fff;
-  border-color: var(--badge-accepted);
+  border-color: var(--badge-rxd-dark);
   font-weight: 600;
-  box-shadow: 0 2px 8px rgba(5, 165, 50, 0.3);
+  box-shadow: 0 2px 8px rgba(0, 242, 242, 0.3);
 }
 .toolbar-btn.active-chart-btn:hover {
-  background: var(--badge-rxd-light);
-  border-color: var(--badge-rxd-light);
+  background: var(--badge-rxd-medium);
+  border-color: var(--badge-rxd-medium);
 }
 [data-theme="light"] .toolbar-btn.active-chart-btn {
-  background: #05a532;
+  background: var(--badge-rxd-dark);
   color: #fff;
-  border-color: #05a532;
-  box-shadow: 0 2px 8px rgba(5, 165, 50, 0.2);
+  border-color: var(--badge-rxd-dark);
+  box-shadow: 0 2px 8px rgba(0, 168, 222, 0.3);
 }
 [data-theme="light"] .toolbar-btn.active-chart-btn:hover {
-  background: #048c2a;
-  border-color: #048c2a;
+  background: var(--badge-rxd-darker);
+  border-color: var(--badge-rxd-darker);
 }
 
 /* Pagination controls for blocks table */
@@ -685,7 +697,7 @@ tbody tr td a.hash-link {
   border-radius: 6px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--badge-rxd-light);
+  background: var(--badge-rxd);
 }
 
 /* Floating theme toggle */
@@ -1020,15 +1032,15 @@ body[data-compact-workers="true"] .dual-blocks {
 }
 
 .modal-btn-confirm {
-  background: #05a532;
+  background: var(--badge-rxd-dark);
   color: white;
-  border: 1px solid #048c2f;
+  border: 1px solid var(--badge-rxd-darker);
 }
 
 .modal-btn-confirm:hover {
-  background: #067a3a;
-  border-color: #048c2f;
-  box-shadow: 0 0 8px rgba(5, 165, 50, 0.3);
+  background: var(--badge-rxd-darker);
+  border-color: var(--badge-rxd-darker);
+  box-shadow: 0 0 8px rgba(0, 242, 242, 0.3);
 }
 
 .modal-btn:active {
@@ -1185,7 +1197,7 @@ body[data-compact-workers="true"] .dual-blocks {
 .export-filter-select:focus {
   outline: none;
   border-color: var(--badge-rxd);
-  box-shadow: 0 0 0 2px rgba(217, 70, 239, 0.2);
+  box-shadow: 0 0 0 2px rgba(0, 242, 242, 0.2);
 }
 
 /* Style the options in the dropdown menu */

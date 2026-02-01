@@ -4,14 +4,17 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Shares Live Feed - Radiant Mining Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/dashboard.css" />
     <link rel="stylesheet" href="/static/shares.css" />
-    <link rel="icon" type="image/png" href="/static/radiant-logo.png" />
+    <link rel="icon" type="image/png" href="/static/radiant-logo-darkmode.png" />
   </head>
   <body>
     <div class="container">
       <h1>
-        <img src="/static/radiant-logo.png" alt="RXD" class="logo" onerror="this.style.display='none'" />
+        <img src="/static/radiant-logo-darkmode.png" alt="RXD" class="logo theme-logo" data-dark="/static/radiant-logo-darkmode.png" data-light="/static/radiant-logo-lightmode.png" onerror="this.style.display='none'" />
         Shares Live Feed
       </h1>
 
@@ -31,7 +34,7 @@
           </div>
           <div class="filter-group">
             <label for="worker-search" style="opacity: 0.6; font-size: 0.85em">Filter by name:</label>
-            <input type="text" id="worker-search" placeholder="e.g., 9900x" style="min-width: 120px" />
+            <input type="text" id="worker-search" placeholder="e.g., IceriverRX0" style="min-width: 120px" />
           </div>
           <div class="filter-group">
             <label>
@@ -63,7 +66,7 @@
           </div>
           <div class="stat-item">
             <div class="label">Accepted</div>
-            <div class="value" id="stat-accepted" style="color: #05a532">0</div>
+            <div class="value" id="stat-accepted" style="color: #00F2F2">0</div>
           </div>
           <div class="stat-item">
             <div class="label">Rejected</div>
@@ -121,6 +124,14 @@
         document.body.appendChild(fab);
       })();
 
+      function updateThemeLogos() {
+        const isLight = document.documentElement.getAttribute("data-theme") === "light";
+        document.querySelectorAll(".theme-logo").forEach(img => {
+          const src = isLight ? img.dataset.light : img.dataset.dark;
+          if (src) img.src = src;
+        });
+      }
+
       (function initThemeToggle() {
         const btn = document.getElementById("theme-toggle");
         if (!btn) return;
@@ -137,6 +148,7 @@
             btn.querySelector(".label")?.replaceChildren(document.createTextNode("Light Mode"));
             if (iconSpan) iconSpan.textContent = "🌙";
           }
+          updateThemeLogos();
         }
 
         if (stored === "light") root.setAttribute("data-theme", "light");
@@ -162,6 +174,7 @@
           if (newTheme === "light") root.setAttribute("data-theme", "light");
           else root.removeAttribute("data-theme");
           updateThemeButtonIcon(newTheme);
+          updateThemeLogos();
         }
       });
 
@@ -420,7 +433,7 @@
         ws.onopen = () => {
           console.log("Connected to share feed");
           const indicator = document.getElementById("live-indicator");
-          if (indicator) { indicator.style.background = "#05a532"; indicator.style.animation = "pulse 1s infinite"; }
+          if (indicator) { indicator.style.background = "#00F2F2"; indicator.style.animation = "pulse 1s infinite"; }
           updateStats();
           applyFilters();
         };

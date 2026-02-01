@@ -10,10 +10,11 @@ def dsha256(b: bytes) -> bytes:
 def sha512_256d(b: bytes) -> bytes:
     """
     Double SHA512/256 hash - Radiant's proof-of-work algorithm.
-    SHA512/256 is the truncated version of SHA512 using a different IV.
+    SHA512/256 uses a DIFFERENT IV than regular SHA512 (not just truncation).
+    This matches the sph_sha512_256_init() used in coinminerz-multi-hashing.
     """
-    h1 = hashlib.sha512(b).digest()[:32]  # First round: SHA512 truncated to 256 bits
-    h2 = hashlib.sha512(h1).digest()[:32]  # Second round: SHA512 truncated to 256 bits
+    h1 = hashlib.new('sha512_256', b).digest()  # First round: proper SHA-512/256
+    h2 = hashlib.new('sha512_256', h1).digest()  # Second round: proper SHA-512/256
     return h2
 
 
