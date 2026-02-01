@@ -1,38 +1,47 @@
-# Kylacoin Binaries
+# Radiant Binaries
 
-Place your Kylacoin daemon and CLI binaries in this directory.
+Place your Radiant node daemon and CLI binaries in this directory.
 
-## Required Files:
+## Required Files
 
-- `kylacoind` - The Kylacoin daemon executable (**Linux x86_64 ELF binary**)
-- `kylacoin-cli` - The Kylacoin CLI client (**Linux x86_64 ELF binary**)
+- `radiantd` - The Radiant daemon executable (**Linux x86_64 ELF binary**)
+- `radiant-cli` - The Radiant CLI client (**Linux x86_64 ELF binary**)
 
 ⚠️ **Important**: Only Linux binaries work with Docker containers! Do NOT use Windows .exe or macOS binaries.
 
-## Where to get them:
+## Where to Get Them
 
-1. Download from the official Kylacoin releases
-2. Build from source code
-3. Extract from existing installation
+Download from the official Radiant Node releases:
+https://github.com/radiantblockchain/radiant-node/releases
 
-## File permissions:
+1. Download the latest `radiant-node-x.x.x-x86_64-linux-gnu.tar.gz`
+2. Extract the archive
+3. Copy `bin/radiantd` and `bin/radiant-cli` to this directory
+
+## File Permissions
 
 The Docker build process will automatically set execute permissions on these files.
 
-## Verification:
+For native execution, set permissions manually:
+
+```bash
+chmod +x radiantd radiant-cli
+```
+
+## Verification
 
 Check if you have the correct binary format:
 
 ```bash
-file kylacoind
-file kylacoin-cli
+file radiantd
+file radiant-cli
 ```
 
 **Expected output:**
 
 ```
-kylacoind: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 3.2.0
-kylacoin-cli: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 3.2.0
+radiantd: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 3.2.0, stripped
+radiant-cli: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 3.2.0, stripped
 ```
 
 ❌ **Wrong formats (will NOT work):**
@@ -40,16 +49,18 @@ kylacoin-cli: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically l
 - Windows: `PE32+ executable (console) x86-64, for MS Windows`
 - macOS: `Mach-O 64-bit executable x86_64`
 
-## Example:
+## Directory Structure
 
 ```
-binaries/kylacoin/
-├── kylacoind
-└── kylacoin-cli
+binaries/radiant/
+├── radiantd      # Radiant daemon
+└── radiant-cli   # Radiant CLI client
 ```
 
-After placing the files here, run:
+## Troubleshooting
 
-```bash
-docker compose build kylacoin
-```
+**"exec format error"** - Wrong binary format (Windows/macOS instead of Linux)
+
+**"Permission denied"** - Run `chmod +x radiantd radiant-cli`
+
+**"No such file or directory"** - Binary may be for wrong glibc version or architecture

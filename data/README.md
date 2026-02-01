@@ -5,7 +5,7 @@ This directory contains the SQLite database for mining statistics when `ENABLE_D
 ## Database File
 
 - `mining.db` - SQLite database containing:
-  - Block finds (chain, height, hash, worker, timestamp)
+  - Block finds (height, hash, worker, timestamp)
   - Connection events (worker connect/disconnect)
   - Share statistics (aggregated per minute)
 
@@ -32,13 +32,13 @@ To start fresh (WARNING: deletes all history):
 
 ```bash
 # Stop the proxy
-docker-compose down
+docker compose down
 
 # Remove database
 rm data/mining.db
 
 # Restart proxy
-docker-compose up -d
+docker compose up -d
 ```
 
 ## Access
@@ -54,4 +54,4 @@ sqlite3 data/mining.db "SELECT * FROM blocks ORDER BY timestamp DESC LIMIT 10;"
 
 ## Schema
 
-See `kcn_proxy/db/schema.py` for complete table definitions.
+See `rxd_proxy/db/schema.py` for complete table definitions.

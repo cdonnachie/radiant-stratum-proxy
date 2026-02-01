@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# Kylacoin-Lyncoin AuxPoW Proxy Setup Script
+# Radiant Stratum Proxy Setup Script
 
 set -e
 
-echo "🚀 Setting up Kylacoin-Lyncoin AuxPoW Proxy..."
+echo "🚀 Setting up Radiant Stratum Proxy..."
 
 # Check if Docker and Docker Compose are installed
 if ! command -v docker &> /dev/null; then
@@ -26,60 +26,63 @@ generate_password() {
 if [ ! -f .env ]; then
     echo "📝 Creating .env file..."
     
-    # Generate secure passwords
-    KCN_PASS=$(generate_password)
-    LCN_PASS=$(generate_password)
+    # Generate secure password
+    RXD_PASS=$(generate_password)
     
     cat > .env << EOF
-# Kylacoin Configuration
-KCN_RPC_USER=kylacoin_user
-KCN_RPC_PASS=${KCN_PASS}
-KCN_RPC_PORT=5110
-KCN_P2P_PORT=5111
-
-# Lyncoin Configuration
-LCN_RPC_USER=lyncoin_user
-LCN_RPC_PASS=${LCN_PASS}
-LCN_RPC_PORT=5053
-LCN_P2P_PORT=5054
-
-# Wallet Addresses (UPDATE THESE WITH YOUR ACTUAL ADDRESSES)
-# Kylacoin address (optional - first miner connection sets this)
-# KCN_WALLET_ADDRESS=KYourKylacoinAddressHere
-LCN_WALLET_ADDRESS=lc1qc5ynszqthxghtq78vc8qn5reh7l0u9rymef953
+# Radiant Node Configuration
+RXD_RPC_USER=radiant_user
+RXD_RPC_PASS=${RXD_PASS}
+RXD_RPC_PORT=7332
+RXD_P2P_PORT=7333
+RXD_ZMQ_PORT=29332
+RXD_ZMQ_RAW_PORT=29333
 
 # Stratum Proxy Configuration
 STRATUM_PORT=54321
 TESTNET=false
-VERBOSE=true
-SHOW_JOBS=true
+LOG_LEVEL=INFO
+SHOW_JOBS=false
+USE_EASIER_TARGET=true
+
+# ZMQ Configuration
+ENABLE_ZMQ=true
+RXD_ZMQ_ENDPOINT=tcp://radiant:29332
+
+# Dashboard Configuration
+ENABLE_DASHBOARD=true
+DASHBOARD_PORT=8080
+
+# Database Configuration (for historical data)
+ENABLE_DATABASE=true
+
+# Variable Difficulty (optional)
+ENABLE_VARDIFF=false
+VARDIFF_TARGET_SHARE_TIME=15.0
+VARDIFF_MIN_DIFFICULTY=0.00001
+VARDIFF_MAX_DIFFICULTY=0.1
+
+# Notifications (optional - fill in to enable)
+# DISCORD_WEBHOOK_URL=
+# TELEGRAM_BOT_TOKEN=
+# TELEGRAM_CHAT_ID=
 EOF
 
-    echo "✅ .env file created with random passwords"
-    echo "⚠️  Please update the wallet addresses in .env file"
+    echo "✅ .env file created with random password"
 else
     echo "✅ .env file already exists"
 fi
 
-# Update config files with passwords from .env
-source .env
+# Create data directories
+mkdir -p submit_history data
 
-# Update kylacoin.conf
-sed -i "s/rpcuser=.*/rpcuser=${KCN_RPC_USER}/" kylacoin.conf
-sed -i "s/rpcpassword=.*/rpcpassword=${KCN_RPC_PASS}/" kylacoin.conf
-
-# Update lyncoin.conf
-sed -i "s/rpcuser=.*/rpcuser=${LCN_RPC_USER}/" lyncoin.conf
-sed -i "s/rpcpassword=.*/rpcpassword=${LCN_RPC_PASS}/" lyncoin.conf
-
-echo "✅ Configuration files updated"
-
-# Create submit_history directory
-mkdir -p submit_history
+echo "✅ Data directories created"
 
 # Check binaries
 echo "🔍 Checking binaries..."
-./check-binaries.sh
+if [ -f ./check-binaries.sh ]; then
+    ./check-binaries.sh
+fi
 
 # Build and start services
 echo "🔨 Building and starting services..."
@@ -94,10 +97,9 @@ docker compose ps
 
 echo ""
 echo "📝 Next Steps:"
-echo "1. Wait for blockchain sync (check with: docker compose logs -f kylacoin lyncoin)"
-echo "2. Update wallet addresses in .env file"
-echo "3. Restart proxy: docker compose restart stratum-proxy"
-echo "4. Connect your miner to localhost:${STRATUM_PORT}"
+echo "1. Wait for blockchain sync (check with: docker compose logs -f radiant)"
+echo "2. Connect your miner to localhost:54321"
+echo "3. View dashboard at http://localhost:8080"
 echo ""
 echo "📖 Commands:"
 echo "  View logs:     docker compose logs -f"
@@ -105,6 +107,5 @@ echo "  Stop services: docker compose down"
 echo "  Restart:       docker compose restart"
 echo ""
 echo "🔧 Monitoring:"
-echo "  KCN status:   docker compose exec kylacoin kylacoin-cli getblockchaininfo"
-echo "  LCN status:   docker compose exec lyncoin lyncoin-cli getblockchaininfo"
+echo "  RXD status:   docker compose exec radiant radiant-cli getblockchaininfo"
 echo "  Proxy logs:   docker compose logs -f stratum-proxy"

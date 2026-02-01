@@ -1,6 +1,6 @@
-# Contributing to KCN Proxy
+# Contributing to Radiant Stratum Proxy
 
-Thank you for your interest in contributing to the KCN Proxy project! We welcome contributions from the community and appreciate your help in making this project better.
+Thank you for your interest in contributing to the Radiant Stratum Proxy project! We welcome contributions from the community and appreciate your help in making this project better.
 
 ## Getting Started
 
@@ -15,8 +15,8 @@ Thank you for your interest in contributing to the KCN Proxy project! We welcome
 1. **Clone the repository**
 
    ```bash
-   git clone https://github.com/cdonnachie/kylacoin-stratum-proxy.git
-   cd kylacoin-stratum-proxy
+   git clone https://github.com/cdonnachie/radiant-stratum-proxy.git
+   cd radiant-stratum-proxy
    ```
 
 2. **Create a virtual environment**
@@ -41,13 +41,13 @@ Thank you for your interest in contributing to the KCN Proxy project! We welcome
 
 5. **Run the proxy**
    ```bash
-   python -m kcn_proxy.main
+   python -m rxd_proxy.run
    ```
 
 ### Using Docker
 
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
 ## Reporting Issues
@@ -109,7 +109,7 @@ Before submitting a pull request:
 1. **Syntax check** - Verify your Python code compiles
 
    ```bash
-   python -m py_compile kcn_proxy/your_file.py
+   python -m py_compile rxd_proxy/your_file.py
    ```
 
 2. **Manual testing** - Test your changes thoroughly
@@ -155,8 +155,8 @@ Before submitting a pull request:
 ## Project Structure
 
 ```
-kcn-proxy/
-├── kcn_proxy/           # Main application code
+radiant-stratum-proxy/
+├── rxd_proxy/           # Main application code
 │   ├── web/            # Web dashboard and API
 │   │   ├── api.py      # REST API endpoints
 │   │   └── static/     # HTML, CSS, JavaScript
@@ -208,4 +208,4 @@ By contributing to this project, you agree that your contributions will be licen
 
 ---
 
-Thank you for contributing to make KCN Proxy better! 🚀
+Thank you for contributing to make Radiant Stratum Proxy better! 🚀

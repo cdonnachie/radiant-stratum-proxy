@@ -2,7 +2,7 @@
 
 ## Reporting a Vulnerability
 
-If you discover a security vulnerability in the KCN Proxy project, please **do not** open a public issue. Instead, please report it responsibly by emailing the maintainers directly.
+If you discover a security vulnerability in the Radiant Stratum Proxy project, please **do not** open a public issue. Instead, please report it responsibly by emailing the maintainers directly.
 
 ### How to Report
 
@@ -73,4 +73,4 @@ We appreciate the security research community and believe that responsible discl
 - Credit researchers (with permission)
 - Keep the vulnerability details confidential until a patch is available
 
-Thank you for helping keep KCN Proxy secure!
+Thank you for helping keep Radiant Stratum Proxy secure!

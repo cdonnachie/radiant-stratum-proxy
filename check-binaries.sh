@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Binary setup helper script for Kylacoin-Lyncoin AuxPoW Proxy
+# Binary setup helper script for Radiant Stratum Proxy
 
 set -e
 
@@ -47,32 +47,16 @@ check_binary() {
     fi
 }
 
-echo "📦 Checking Kylacoin binaries..."
-check_binary "binaries/kylacoin/kylacoind" "Kylacoin Daemon"
-check_binary "binaries/kylacoin/kylacoin-cli" "Kylacoin CLI"
-
-echo ""
-echo "📦 Checking Lyncoin binaries..."
-check_binary "binaries/lyncoin/lyncoind" "Lyncoin Daemon"
-check_binary "binaries/lyncoin/lyncoin-cli" "Lyncoin CLI"
+echo "📦 Checking Radiant binaries..."
+check_binary "binaries/radiant/radiantd" "Radiant Daemon"
+check_binary "binaries/radiant/radiant-cli" "Radiant CLI"
 
 echo ""
 echo "📋 Directory structure:"
 echo "binaries/"
-echo "├── kylacoin/"
-if [ -d "binaries/kylacoin" ]; then
-    for file in binaries/kylacoin/*; do
-        if [ -f "$file" ]; then
-            echo "│   ├── $(basename "$file")"
-        fi
-    done
-else
-    echo "│   └── (directory missing)"
-fi
-
-echo "└── lyncoin/"
-if [ -d "binaries/lyncoin" ]; then
-    for file in binaries/lyncoin/*; do
+echo "└── radiant/"
+if [ -d "binaries/radiant" ]; then
+    for file in binaries/radiant/*; do
         if [ -f "$file" ]; then
             echo "    ├── $(basename "$file")"
         fi
@@ -86,10 +70,8 @@ echo ""
 # Check if all required binaries are present
 missing_binaries=0
 required_files=(
-    "binaries/kylacoin/kylacoind"
-    "binaries/kylacoin/kylacoin-cli" 
-    "binaries/lyncoin/lyncoind"
-    "binaries/lyncoin/lyncoin-cli"
+    "binaries/radiant/radiantd"
+    "binaries/radiant/radiant-cli" 
 )
 
 for file in "${required_files[@]}"; do
@@ -109,13 +91,13 @@ else
     echo "⚠️  Missing $missing_binaries required binaries"
     echo ""
     echo "📝 To fix:"
-    echo "1. Copy binaries to the correct directories (see README.md)"
-    echo "2. Run this script again to verify"
-    echo "3. Build Docker images: docker compose build"
+    echo "1. Download Radiant Node from https://github.com/radiantblockchain/radiant-node/releases"
+    echo "2. Extract radiantd and radiant-cli to binaries/radiant/"
+    echo "3. Run this script again to verify"
+    echo "4. Build Docker images: docker compose build"
 fi
 
 echo ""
 echo "💡 Help:"
 echo "  Binary requirements: See binaries/README.md"
-echo "  Kylacoin setup: See binaries/kylacoin/README.md" 
-echo "  Lyncoin setup: See binaries/lyncoin/README.md"
+echo "  Radiant setup: See binaries/radiant/README.md"

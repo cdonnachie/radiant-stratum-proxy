@@ -1,105 +1,135 @@
-# Cryptocurrency Binaries Directory
+# Binaries Directory
 
-This directory contains the local binaries for both Kylacoin and Lyncoin that will be used in the Docker containers.
+This directory contains the blockchain node binaries used by Docker containers.
 
-⚠️ **CRITICAL**: Only **Linux x86_64 ELF binaries** work with Docker containers! Do NOT use Windows .exe or macOS binaries.
-
-## Directory Structure:
+## Directory Structure
 
 ```
 binaries/
-├── kylacoin/
-│   ├── kylacoind      # Kylacoin daemon
-│   ├── kylacoin-cli   # Kylacoin CLI
-│   └── README.md
-├── lyncoin/
-│   ├── lyncoind       # Lyncoin daemon
-│   ├── lyncoin-cli    # Lyncoin CLI
-│   └── README.md
-└── README.md          # This file
+└── radiant/          # Radiant blockchain binaries
+    ├── radiantd      # Radiant daemon
+    └── radiant-cli   # Radiant CLI client
 ```
 
-## Setup Instructions:
+## Required Binaries
 
-1. **Copy Kylacoin binaries** (Linux x86_64 ELF format) into `kylacoin/` directory:
+### Radiant (`binaries/radiant/`)
 
-   - `kylacoind`
-   - `kylacoin-cli`
+| Binary        | Description          | Required |
+| ------------- | -------------------- | -------- |
+| `radiantd`    | Radiant node daemon  | ✅ Yes   |
+| `radiant-cli` | Command-line client  | ✅ Yes   |
 
-2. **Copy Lyncoin binaries** (Linux x86_64 ELF format) into `lyncoin/` directory:
+## Download Sources
 
-   - `lyncoind`
-   - `lyncoin-cli`
+### Radiant Node
 
-3. **Build the Docker images**:
+**Official Repository:**
+https://github.com/radiantblockchain/radiant-node/releases
+
+Download the latest Linux x86_64 release and extract the binaries.
+
+## Binary Requirements
+
+### Platform
+
+⚠️ **Critical**: Docker containers run Linux. You must use Linux binaries!
+
+| Platform     | Works in Docker? | Notes                                 |
+| ------------ | ---------------- | ------------------------------------- |
+| Linux x86_64 | ✅ Yes           | Required for Docker                   |
+| Windows      | ❌ No            | .exe files won't run in Linux container |
+| macOS        | ❌ No            | Mach-O binaries won't run in Linux     |
+| Linux ARM64  | ❌ No            | Wrong architecture                    |
+
+### Verification
+
+Check binary format with the `file` command:
+
+**Linux (correct):**
+
+```bash
+$ file binaries/radiant/radiantd
+binaries/radiant/radiantd: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 3.2.0, stripped
+```
+
+**Windows (wrong):**
+
+```
+binaries/radiant/radiantd.exe: PE32+ executable (console) x86-64, for MS Windows
+```
+
+**macOS (wrong):**
+
+```
+binaries/radiant/radiantd: Mach-O 64-bit executable x86_64
+```
+
+### Permissions
+
+Binaries need execute permission. Docker handles this automatically, but for native execution:
+
+```bash
+chmod +x binaries/radiant/radiantd
+chmod +x binaries/radiant/radiant-cli
+```
+
+## Setup Instructions
+
+1. **Download binaries** from official sources above
+
+2. **Extract** to the appropriate directory:
 
    ```bash
-   docker compose build kylacoin lyncoin
+   # Example for Radiant
+   tar -xzf radiant-node-x.x.x-x86_64-linux-gnu.tar.gz
+   cp radiant-node-x.x.x/bin/radiantd binaries/radiant/
+   cp radiant-node-x.x.x/bin/radiant-cli binaries/radiant/
    ```
 
-4. **Start the services**:
+3. **Verify** binary format:
+
    ```bash
-   docker compose up -d
+   file binaries/radiant/radiantd
    ```
 
-## Binary Requirements:
+4. **Check with script**:
+   ```bash
+   ./check-binaries.sh    # Linux/Mac
+   check-binaries.bat     # Windows
+   ```
 
-**Platform**: Linux x86_64 ELF executables ONLY
+## Troubleshooting
 
-### Kylacoin:
+### "No such file or directory" when binary exists
 
-- **Format**: Linux x86_64 ELF executable
-- **Compatibility**: Ubuntu 24.04 Linux (glibc 2.39+)
-- **Dependencies**: Statically linked or with required dependencies included
-- **Permissions**: Executable permissions (set automatically by Docker)
+Usually means wrong binary format (Windows/macOS instead of Linux).
 
-### Lyncoin:
+### "Permission denied"
 
-- **Format**: Linux x86_64 ELF executable
-- **Compatibility**: Ubuntu 24.04 Linux (glibc 2.39+)
-- **Features**: AuxPoW support enabled
-- **Permissions**: Executable permissions (set automatically by Docker)
-
-## Troubleshooting:
-
-### Missing binaries:
+Set execute permission:
 
 ```bash
-# Check if files exist
-ls -la binaries/kylacoin/
-ls -la binaries/lyncoin/
-
-# Build specific service
-docker compose build kylacoin
-docker compose build lyncoin
+chmod +x binaries/radiant/*
 ```
 
-### Permission issues:
+### Binary won't start in Docker
 
-The Dockerfile automatically sets execute permissions, but if you're having issues:
+Check Docker logs:
 
 ```bash
-chmod +x binaries/kylacoin/*
-chmod +x binaries/lyncoin/*
+docker compose logs radiant
 ```
 
-### Architecture mismatch:
+Common issues:
 
-Ensure your binaries are compiled for Linux x86_64:
+- Wrong binary architecture
+- Missing library dependencies
+- Corrupt download (re-download)
 
-```bash
-file binaries/kylacoin/kylacoind
-file binaries/lyncoin/lyncoind
-```
+## Security Notes
 
-**Expected output:**
-
-```
-binaries/kylacoin/kylacoind: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 3.2.0
-binaries/lyncoin/lyncoind: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 3.2.0
-```
-
-❌ **Wrong formats (will cause container failures):**
-
-- Windows: `PE32+ executable (console) x86-64, for MS Windows`
-- macOS: `Mach-O 64-bit executable x86_64`
+- Always download from official sources
+- Verify checksums when available
+- Keep binaries updated for security patches
+- Don't run untrusted binaries

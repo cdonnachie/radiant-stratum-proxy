@@ -50,8 +50,7 @@ logs/
 Thumbs.db
 
 # Blockchain data
-kylacoin-data/
-lyncoin-data/
+radiant-data/
 
 # Backup files
 *.bak

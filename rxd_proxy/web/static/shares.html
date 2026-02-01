@@ -3,26 +3,16 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Shares Live Feed - KCN-LCN Mining Dashboard</title>
+    <title>Shares Live Feed - Radiant Mining Dashboard</title>
     <link rel="stylesheet" href="/static/dashboard.css" />
     <link rel="stylesheet" href="/static/shares.css" />
+    <link rel="icon" type="image/png" href="/static/radiant-logo.png" />
   </head>
   <body>
     <div class="container">
       <h1>
-        <img
-          src="/static/kylacoin-logo.png"
-          alt="KCN"
-          class="logo"
-          onerror="this.style.display='none'"
-        />
+        <img src="/static/radiant-logo.png" alt="RXD" class="logo" onerror="this.style.display='none'" />
         Shares Live Feed
-        <img
-          src="/static/lyncoin-logo.png"
-          alt="LCN"
-          class="logo"
-          onerror="this.style.display='none'"
-        />
       </h1>
 
       <nav class="dashboard-nav">
@@ -40,15 +30,8 @@
             </select>
           </div>
           <div class="filter-group">
-            <label for="worker-search" style="opacity: 0.6; font-size: 0.85em"
-              >Filter by name:</label
-            >
-            <input
-              type="text"
-              id="worker-search"
-              placeholder="e.g., 9900x"
-              style="min-width: 120px"
-            />
+            <label for="worker-search" style="opacity: 0.6; font-size: 0.85em">Filter by name:</label>
+            <input type="text" id="worker-search" placeholder="e.g., 9900x" style="min-width: 120px" />
           </div>
           <div class="filter-group">
             <label>
@@ -100,8 +83,7 @@
         <div class="shares-table-wrapper">
           <div class="shares-table-header">
             <h3>
-              <span class="live-indicator" id="live-indicator"></span>Recent
-              Shares
+              <span class="live-indicator" id="live-indicator"></span>Recent Shares
             </h3>
           </div>
           <table class="shares-table" id="shares-table">
@@ -110,8 +92,7 @@
                 <th style="width: 120px">Time</th>
                 <th style="width: 150px">Worker</th>
                 <th style="width: 120px">Share Difficulty</th>
-                <th style="width: 130px">KCN Target</th>
-                <th style="width: 130px">LCN Target</th>
+                <th style="width: 130px">RXD Target</th>
                 <th style="width: 100px">Status</th>
                 <th style="width: 100px">Software</th>
               </tr>
@@ -131,14 +112,12 @@
     </div>
 
     <script>
-      // Theme management - sync with main dashboard theme (same as index.html)
-      // Insert floating theme toggle at runtime (ensures CSS loaded)
+      // Theme management - sync with main dashboard theme
       (function createFloatingThemeToggle() {
         const fab = document.createElement("button");
         fab.id = "theme-toggle";
         fab.className = "theme-toggle-fab";
-        fab.innerHTML =
-          '<span class="icon" aria-hidden="true">🌙</span><span class="label">Light Mode</span>';
+        fab.innerHTML = '<span class="icon" aria-hidden="true">🌙</span><span class="label">Light Mode</span>';
         document.body.appendChild(fab);
       })();
 
@@ -152,38 +131,25 @@
           const isLight = root.getAttribute("data-theme") === "light";
           const iconSpan = btn.querySelector(".icon");
           if (isLight) {
-            btn
-              .querySelector(".label")
-              ?.replaceChildren(document.createTextNode("Dark Mode"));
+            btn.querySelector(".label")?.replaceChildren(document.createTextNode("Dark Mode"));
             if (iconSpan) iconSpan.textContent = "☀️";
           } else {
-            btn
-              .querySelector(".label")
-              ?.replaceChildren(document.createTextNode("Light Mode"));
+            btn.querySelector(".label")?.replaceChildren(document.createTextNode("Light Mode"));
             if (iconSpan) iconSpan.textContent = "🌙";
           }
         }
 
-        if (stored === "light") {
-          root.setAttribute("data-theme", "light");
-        } else {
-          root.removeAttribute("data-theme");
-        }
+        if (stored === "light") root.setAttribute("data-theme", "light");
+        else root.removeAttribute("data-theme");
         setLabel();
 
         btn.addEventListener("click", () => {
           const isLight = root.getAttribute("data-theme") === "light";
-          // Add fade class for cross-fade effect
           document.body.classList.remove("theme-fade");
-          void document.body.offsetWidth; // force reflow
+          void document.body.offsetWidth;
           document.body.classList.add("theme-fade");
-          if (isLight) {
-            root.removeAttribute("data-theme");
-            localStorage.setItem("dashboardTheme", "dark");
-          } else {
-            root.setAttribute("data-theme", "light");
-            localStorage.setItem("dashboardTheme", "light");
-          }
+          if (isLight) { root.removeAttribute("data-theme"); localStorage.setItem("dashboardTheme", "dark"); }
+          else { root.setAttribute("data-theme", "light"); localStorage.setItem("dashboardTheme", "light"); }
           setLabel();
         });
       })();
@@ -193,11 +159,8 @@
         if (e.key === "dashboardTheme") {
           const root = document.documentElement;
           const newTheme = e.newValue || "dark";
-          if (newTheme === "light") {
-            root.setAttribute("data-theme", "light");
-          } else {
-            root.removeAttribute("data-theme");
-          }
+          if (newTheme === "light") root.setAttribute("data-theme", "light");
+          else root.removeAttribute("data-theme");
           updateThemeButtonIcon(newTheme);
         }
       });
@@ -207,95 +170,44 @@
         if (btn) {
           const iconSpan = btn.querySelector(".icon");
           const labelSpan = btn.querySelector(".label");
-          if (theme === "light") {
-            if (iconSpan) iconSpan.textContent = "☀️";
-            if (labelSpan) labelSpan.textContent = "Dark Mode";
-          } else {
-            if (iconSpan) iconSpan.textContent = "🌙";
-            if (labelSpan) labelSpan.textContent = "Light Mode";
-          }
+          if (theme === "light") { if (iconSpan) iconSpan.textContent = "☀️"; if (labelSpan) labelSpan.textContent = "Dark Mode"; }
+          else { if (iconSpan) iconSpan.textContent = "🌙"; if (labelSpan) labelSpan.textContent = "Light Mode"; }
         }
       }
 
       // State
       let ws = null;
       let shares = [];
-      let hasMergeMiners = false; // Track if any shares have LCN mining
-      let uniqueWorkers = new Set(); // Track unique worker names
-      let currentFilters = {
-        worker: "",
-        acceptedOnly: false,
-        blocksOnly: false,
-      };
-
-      // Limit in-memory shares to prevent memory bloat (keep last 500 shares in memory)
+      let uniqueWorkers = new Set();
+      let currentFilters = { worker: "", acceptedOnly: false, blocksOnly: false };
       const MAX_SHARES_IN_MEMORY = 500;
 
-      // Format timestamp
-      function formatTime(timestamp) {
-        const date = new Date(timestamp * 1000);
-        return date.toLocaleTimeString();
-      }
+      function formatTime(timestamp) { return new Date(timestamp * 1000).toLocaleTimeString(); }
 
-      // Calculate time ago
       function timeAgo(timestamp) {
         const now = Math.floor(Date.now() / 1000);
         const diff = now - timestamp;
-
         if (diff < 60) return `${diff}s ago`;
         if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
         if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
         return `${Math.floor(diff / 86400)}d ago`;
       }
 
-      // Format difficulty with threshold
       function formatDifficulty(value) {
         if (value >= 1000000) return (value / 1000000).toFixed(2) + "M";
         if (value >= 1000) return (value / 1000).toFixed(2) + "K";
         return value.toFixed(8);
       }
 
-      // Get difficulty ratio class
       function getDifficultyRatioClass(ratio) {
         if (ratio >= 0.9) return "good";
         if (ratio >= 0.5) return "warning";
         return "danger";
       }
 
-      // Toggle LCN column visibility
-      function updateColumnVisibility() {
-        const table = document.getElementById("shares-table");
-        const headers = table.querySelectorAll("th");
-        const rows = table.querySelectorAll("tbody tr");
-
-        // LCN Target is the 4th column (index 4 in 0-indexed: Time, Worker, Share Diff, KCN, LCN)
-        const lcnColumnIndex = 4;
-
-        if (hasMergeMiners) {
-          // Show LCN column
-          if (headers[lcnColumnIndex])
-            headers[lcnColumnIndex].style.display = "";
-          rows.forEach((row) => {
-            const cells = row.querySelectorAll("td");
-            if (cells[lcnColumnIndex]) cells[lcnColumnIndex].style.display = "";
-          });
-        } else {
-          // Hide LCN column
-          if (headers[lcnColumnIndex])
-            headers[lcnColumnIndex].style.display = "none";
-          rows.forEach((row) => {
-            const cells = row.querySelectorAll("td");
-            if (cells[lcnColumnIndex])
-              cells[lcnColumnIndex].style.display = "none";
-          });
-        }
-      }
-
-      // Update worker dropdown with available workers
       function updateWorkerDropdown(workerName) {
         if (!uniqueWorkers.has(workerName)) {
           uniqueWorkers.add(workerName);
-
           const select = document.getElementById("worker-filter");
           if (select) {
             const option = document.createElement("option");
@@ -306,111 +218,48 @@
         }
       }
 
-      // Add share to table
       function addShareToTable(share) {
         const tbody = document.getElementById("shares-tbody");
-
-        // Update worker dropdown
         updateWorkerDropdown(share.worker);
 
-        // Clear "waiting" message
-        if (
-          tbody.children.length === 1 &&
-          tbody.children[0].textContent.includes("Waiting")
-        ) {
+        if (tbody.children.length === 1 && tbody.children[0].textContent.includes("Waiting")) {
           tbody.innerHTML = "";
         }
 
-        // Create row
         const row = document.createElement("tr");
-        row.className = `share-row ${share.is_block ? "block" : ""} ${
-          !share.accepted ? "rejected" : ""
-        }`;
+        row.className = `share-row ${share.is_block ? "block" : ""} ${!share.accepted ? "rejected" : ""}`;
 
-        // Calculate ratios first
-        const kcnRatio =
-          share.kcn_difficulty > 0
-            ? share.share_difficulty / share.kcn_difficulty
-            : 0;
-        const lcnRatio =
-          share.lcn_difficulty > 0
-            ? share.share_difficulty / share.lcn_difficulty
-            : 0;
+        // Calculate RXD ratio
+        const rxdRatio = share.rxd_difficulty > 0 ? share.share_difficulty / share.rxd_difficulty : 0;
 
-        const statusLabel = share.is_block
-          ? "BLOCK"
-          : share.accepted
-          ? "Accepted"
-          : "Rejected";
-        const statusClass = share.is_block
-          ? "status-block"
-          : share.accepted
-          ? "status-accepted"
-          : "status-rejected";
+        const statusLabel = share.is_block ? "BLOCK" : share.accepted ? "Accepted" : "Rejected";
+        const statusClass = share.is_block ? "status-block" : share.accepted ? "status-accepted" : "status-rejected";
 
-        // Determine which chain(s) the block was found on
-        let blockChains = [];
-        if (share.is_block) {
-          // Infer from ratios which chains the block was for
-          if (kcnRatio >= 1.0) blockChains.push("KCN");
-          if (lcnRatio >= 1.0) blockChains.push("LCN");
-        }
-
-        // Create time cell that will be updated dynamically
         const timeCell = document.createElement("td");
         timeCell.className = "time-ago";
         timeCell.textContent = timeAgo(share.timestamp);
         timeCell.dataset.timestamp = share.timestamp;
-
-        // Detect if this is merge mining (has non-zero LCN difficulty)
-        if (share.lcn_difficulty > 0 && !hasMergeMiners) {
-          hasMergeMiners = true;
-          updateColumnVisibility();
-        }
+        timeCell.style.fontSize = "0.9em";
 
         row.innerHTML = `
           <td class="worker-name">${escapeHtml(share.worker)}</td>
-          <td style="font-size: 0.9em; text-align: center">${formatDifficulty(
-            share.share_difficulty
-          )}</td>
+          <td style="font-size: 0.9em; text-align: center">${formatDifficulty(share.share_difficulty)}</td>
           <td class="difficulty-ratio" style="font-size: 0.9em">
-            Target: ${formatDifficulty(share.kcn_difficulty)}<br/>
-            Ratio: <span class="${getDifficultyRatioClass(
-              kcnRatio
-            )}">${kcnRatio.toFixed(3)}x</span>
-          </td>
-          <td class="difficulty-ratio" style="font-size: 0.9em">
-            Target: ${formatDifficulty(share.lcn_difficulty)}<br/>
-            Ratio: <span class="${getDifficultyRatioClass(
-              lcnRatio
-            )}">${lcnRatio.toFixed(3)}x</span>
+            Target: ${formatDifficulty(share.rxd_difficulty)}<br/>
+            Ratio: <span class="${getDifficultyRatioClass(rxdRatio)}">${rxdRatio.toFixed(3)}x</span>
           </td>
           <td>
-            <span class="status-badge ${statusClass}">
-              ${statusLabel}${
-          blockChains.length > 0 ? ` (${blockChains.join(" + ")})` : ""
-        }
-            </span>
+            <span class="status-badge ${statusClass}">${statusLabel}${share.is_block ? " (RXD)" : ""}</span>
           </td>
           <td>${escapeHtml(share.miner_software)}</td>
         `;
 
-        // Insert time cell at the beginning
-        timeCell.style.fontSize = "0.9em";
         row.insertBefore(timeCell, row.firstChild);
-
-        // Add animation class for fade-in + highlight
         row.classList.add("new-share");
-
-        // Insert at top
         tbody.insertBefore(row, tbody.firstChild);
 
-        // Remove animation class after animation completes to allow re-animation if needed
-        setTimeout(() => {
-          row.classList.remove("new-share");
-        }, 1500);
+        setTimeout(() => { row.classList.remove("new-share"); }, 1500);
 
-        // Keep only last 100 rows
         while (tbody.children.length > 100) {
           tbody.removeChild(tbody.lastChild);
         }
@@ -418,202 +267,106 @@
         updateLastUpdateTime();
       }
 
-      // Escape HTML
       function escapeHtml(text) {
-        const map = {
-          "&": "&amp;",
-          "<": "&lt;",
-          ">": "&gt;",
-          '"': "&quot;",
-          "'": "&#039;",
-        };
+        const map = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" };
         return text.replace(/[&<>"']/g, (m) => map[m]);
       }
 
-      // Update all time cells to show current elapsed time
       function updateTimeCells() {
-        const timeCells = document.querySelectorAll(
-          "td.time-ago[data-timestamp]"
-        );
+        const timeCells = document.querySelectorAll("td.time-ago[data-timestamp]");
         timeCells.forEach((cell) => {
           const timestamp = parseInt(cell.dataset.timestamp);
           cell.textContent = timeAgo(timestamp);
         });
       }
 
-      // Update statistics
       async function updateStats() {
         try {
           const response = await fetch("/api/shares/stats");
           const stats = await response.json();
-
-          document.getElementById("stat-total").textContent =
-            stats.total_shares;
-          document.getElementById("stat-accepted").textContent =
-            stats.accepted_shares;
-          document.getElementById("stat-rejected").textContent =
-            stats.rejected_shares;
+          document.getElementById("stat-total").textContent = stats.total_shares;
+          document.getElementById("stat-accepted").textContent = stats.accepted_shares;
+          document.getElementById("stat-rejected").textContent = stats.rejected_shares;
           document.getElementById("stat-blocks").textContent = stats.blocks;
-          document.getElementById("stat-clients").textContent =
-            stats.connected_workers;
-        } catch (e) {
-          console.error("Failed to fetch stats:", e);
-        }
+          document.getElementById("stat-clients").textContent = stats.connected_workers;
+        } catch (e) { console.error("Failed to fetch stats:", e); }
       }
 
-      // Update search field disabled state based on worker selection
       function updateSearchFieldState() {
         const workerSelect = document.getElementById("worker-filter");
         const searchField = document.getElementById("worker-search");
         const isWorkerSelected = workerSelect.value.trim() !== "";
-
         searchField.disabled = isWorkerSelected;
-        if (isWorkerSelected) {
-          searchField.value = "";
-        }
+        if (isWorkerSelected) searchField.value = "";
       }
 
-      // Apply filters
       async function applyFilters() {
-        // Get worker from dropdown (full worker name) or from search field (substring)
-        const selectedWorker = document
-          .getElementById("worker-filter")
-          .value.trim();
-        const searchWorker = document
-          .getElementById("worker-search")
-          .value.trim()
-          .toLowerCase();
+        const selectedWorker = document.getElementById("worker-filter").value.trim();
+        const searchWorker = document.getElementById("worker-search").value.trim().toLowerCase();
 
-        // Use selected worker from dropdown, or search in all workers if search field is used
         let worker = selectedWorker;
-
-        // If search field is used, find workers matching the search term
         if (searchWorker && !selectedWorker) {
-          // Find first worker that contains the search term
           for (let w of uniqueWorkers) {
-            if (w.toLowerCase().includes(searchWorker)) {
-              worker = w;
-              break;
-            }
+            if (w.toLowerCase().includes(searchWorker)) { worker = w; break; }
           }
         }
 
         const acceptedOnly = document.getElementById("accepted-only").checked;
         const blocksOnly = document.getElementById("blocks-only").checked;
-
         currentFilters = { worker, acceptedOnly, blocksOnly };
 
         try {
-          const params = new URLSearchParams({
-            limit: 100,
-            offset: 0,
-          });
-
+          const params = new URLSearchParams({ limit: 100, offset: 0 });
           if (worker) params.append("worker", worker);
           if (acceptedOnly) params.append("accepted_only", "true");
           if (blocksOnly) params.append("blocks_only", "true");
 
           const response = await fetch(`/api/shares?${params}`);
           const data = await response.json();
-
           const tbody = document.getElementById("shares-tbody");
           tbody.innerHTML = "";
 
           if (data.shares.length === 0) {
-            tbody.innerHTML =
-              '<tr><td colspan="7" class="no-shares">No shares match filters</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="6" class="no-shares">No shares match filters</td></tr>';
           } else {
-            // Display shares (already sorted newest first from API)
             data.shares.forEach((share) => {
               const row = document.createElement("tr");
-              row.className = `share-row ${share.is_block ? "block" : ""} ${
-                !share.accepted ? "rejected" : ""
-              }`;
+              row.className = `share-row ${share.is_block ? "block" : ""} ${!share.accepted ? "rejected" : ""}`;
 
-              const statusLabel = share.is_block
-                ? "BLOCK"
-                : share.accepted
-                ? "Accepted"
-                : "Rejected";
-              const statusClass = share.is_block
-                ? "status-block"
-                : share.accepted
-                ? "status-accepted"
-                : "status-rejected";
+              const statusLabel = share.is_block ? "BLOCK" : share.accepted ? "Accepted" : "Rejected";
+              const statusClass = share.is_block ? "status-block" : share.accepted ? "status-accepted" : "status-rejected";
 
-              // Create time cell with data attribute for dynamic updates
               const timeCell = document.createElement("td");
               timeCell.className = "time-ago";
               timeCell.textContent = timeAgo(share.timestamp);
               timeCell.dataset.timestamp = share.timestamp;
               timeCell.style.fontSize = "0.9em";
 
-              // Calculate ratios
-              const kcnRatio =
-                share.kcn_difficulty > 0
-                  ? share.share_difficulty / share.kcn_difficulty
-                  : 0;
-              const lcnRatio =
-                share.lcn_difficulty > 0
-                  ? share.share_difficulty / share.lcn_difficulty
-                  : 0;
-
-              // Determine which chain(s) the block was found on
-              let blockChains = [];
-              if (share.is_block) {
-                if (kcnRatio >= 1.0) blockChains.push("KCN");
-                if (lcnRatio >= 1.0) blockChains.push("LCN");
-              }
-
-              // Detect merge mining
-              if (share.lcn_difficulty > 0 && !hasMergeMiners) {
-                hasMergeMiners = true;
-              }
+              const rxdRatio = share.rxd_difficulty > 0 ? share.share_difficulty / share.rxd_difficulty : 0;
 
               row.innerHTML = `
                 <td class="worker-name">${escapeHtml(share.worker)}</td>
-                <td style="font-size: 0.9em; text-align: center">${formatDifficulty(
-                  share.share_difficulty
-                )}</td>
+                <td style="font-size: 0.9em; text-align: center">${formatDifficulty(share.share_difficulty)}</td>
                 <td class="difficulty-ratio" style="font-size: 0.9em">
-                  Target: ${formatDifficulty(share.kcn_difficulty)}<br/>
-                  Ratio: <span class="${getDifficultyRatioClass(
-                    kcnRatio
-                  )}">${kcnRatio.toFixed(3)}x</span>
-                </td>
-                <td class="difficulty-ratio" style="font-size: 0.9em">
-                  Target: ${formatDifficulty(share.lcn_difficulty)}<br/>
-                  Ratio: <span class="${getDifficultyRatioClass(
-                    lcnRatio
-                  )}">${lcnRatio.toFixed(3)}x</span>
+                  Target: ${formatDifficulty(share.rxd_difficulty)}<br/>
+                  Ratio: <span class="${getDifficultyRatioClass(rxdRatio)}">${rxdRatio.toFixed(3)}x</span>
                 </td>
                 <td>
-                  <span class="status-badge ${statusClass}">
-                    ${statusLabel}${
-                blockChains.length > 0 ? ` (${blockChains.join(" + ")})` : ""
-              }
-                  </span>
+                  <span class="status-badge ${statusClass}">${statusLabel}${share.is_block ? " (RXD)" : ""}</span>
                 </td>
                 <td>${escapeHtml(share.miner_software)}</td>
               `;
 
-              // Insert time cell at the beginning
               row.insertBefore(timeCell, row.firstChild);
               tbody.appendChild(row);
             });
-
-            // Update column visibility after loading all shares
-            updateColumnVisibility();
           }
 
           updateLastUpdateTime();
           updateFilterStatus();
-        } catch (e) {
-          console.error("Failed to apply filters:", e);
-        }
+        } catch (e) { console.error("Failed to apply filters:", e); }
       }
 
-      // Clear individual filter
       function clearFilter(filterType) {
         if (filterType === "worker") {
           document.getElementById("worker-filter").value = "";
@@ -630,49 +383,25 @@
         applyFilters();
       }
 
-      // Update filter status indicator
       function updateFilterStatus() {
         const filtersRow = document.getElementById("filters-row");
         const filterBadges = document.getElementById("filter-badges");
         filterBadges.innerHTML = "";
 
         const activeFilters = [];
-
         if (currentFilters.worker) {
-          const workerDisplay =
-            currentFilters.worker.length > 20
-              ? currentFilters.worker.substring(0, 20) + "..."
-              : currentFilters.worker;
-          activeFilters.push({
-            type: "worker",
-            label: `Worker: ${workerDisplay}`,
-            full: currentFilters.worker,
-          });
+          const workerDisplay = currentFilters.worker.length > 20 ? currentFilters.worker.substring(0, 20) + "..." : currentFilters.worker;
+          activeFilters.push({ type: "worker", label: `Worker: ${workerDisplay}`, full: currentFilters.worker });
         }
-        if (currentFilters.acceptedOnly) {
-          activeFilters.push({
-            type: "accepted",
-            label: "Accepted Only",
-            full: "Accepted Only",
-          });
-        }
-        if (currentFilters.blocksOnly) {
-          activeFilters.push({
-            type: "blocks",
-            label: "Blocks Only",
-            full: "Blocks Only",
-          });
-        }
+        if (currentFilters.acceptedOnly) activeFilters.push({ type: "accepted", label: "Accepted Only", full: "Accepted Only" });
+        if (currentFilters.blocksOnly) activeFilters.push({ type: "blocks", label: "Blocks Only", full: "Blocks Only" });
 
         if (activeFilters.length > 0) {
           activeFilters.forEach((filter) => {
             const badge = document.createElement("span");
             badge.className = "filter-badge";
             badge.title = filter.full;
-            badge.innerHTML = `
-              ${filter.label}
-              <button class="badge-close" onclick="clearFilter('${filter.type}')" title="Clear this filter">×</button>
-            `;
+            badge.innerHTML = `${filter.label}<button class="badge-close" onclick="clearFilter('${filter.type}')" title="Clear this filter">×</button>`;
             filterBadges.appendChild(badge);
           });
           filtersRow.style.display = "block";
@@ -681,143 +410,68 @@
         }
       }
 
-      // Connect WebSocket
       function connectWebSocket() {
         const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
         const wsUrl = `${protocol}//${window.location.host}/ws/shares`;
 
-        try {
-          ws = new WebSocket(wsUrl);
-        } catch (e) {
-          console.error("Failed to create WebSocket:", e);
-          setTimeout(connectWebSocket, 3000);
-          return;
-        }
+        try { ws = new WebSocket(wsUrl); }
+        catch (e) { console.error("Failed to create WebSocket:", e); setTimeout(connectWebSocket, 3000); return; }
 
         ws.onopen = () => {
           console.log("Connected to share feed");
-          // Update live indicator to green
           const indicator = document.getElementById("live-indicator");
-          if (indicator) {
-            indicator.style.background = "#05a532";
-            indicator.style.animation = "pulse 1s infinite";
-          }
+          if (indicator) { indicator.style.background = "#05a532"; indicator.style.animation = "pulse 1s infinite"; }
           updateStats();
-          // Refresh table after connection
           applyFilters();
         };
 
         ws.onmessage = (event) => {
           try {
             const data = JSON.parse(event.data);
+            if (data.type === "ping") return;
 
-            // Skip ping messages
-            if (data.type === "ping") {
-              console.debug("Received ping");
-              return;
-            }
-
-            // Handle share data
             if (data.id !== undefined && data.timestamp !== undefined) {
               shares.push(data);
-
-              // Keep only last 500 shares in memory to prevent bloat
-              if (shares.length > MAX_SHARES_IN_MEMORY) {
-                shares.shift();
-              }
-
-              // Only add if passes current filters
-              if (passesFilters(data)) {
-                addShareToTable(data);
-              }
-
-              // Update stats periodically
-              if (shares.length % 10 === 0) {
-                updateStats();
-              }
+              if (shares.length > MAX_SHARES_IN_MEMORY) shares.shift();
+              if (passesFilters(data)) addShareToTable(data);
+              if (shares.length % 10 === 0) updateStats();
             }
-          } catch (e) {
-            console.error("Failed to parse message:", e, event.data);
-          }
+          } catch (e) { console.error("Failed to parse message:", e, event.data); }
         };
 
-        ws.onerror = (error) => {
-          console.error("WebSocket error:", error);
-        };
+        ws.onerror = (error) => { console.error("WebSocket error:", error); };
 
         ws.onclose = () => {
-          console.log(
-            "Disconnected from share feed, reconnecting in 3 seconds..."
-          );
-          // Update live indicator
+          console.log("Disconnected from share feed, reconnecting in 3 seconds...");
           const indicator = document.getElementById("live-indicator");
-          if (indicator) {
-            indicator.style.background = "#ff6464";
-          }
-          // Reconnect after 3 seconds
+          if (indicator) indicator.style.background = "#ff6464";
           setTimeout(connectWebSocket, 3000);
         };
       }
 
-      // Check if share passes current filters
       function passesFilters(share) {
-        if (currentFilters.worker && share.worker !== currentFilters.worker) {
-          return false;
-        }
-        if (currentFilters.acceptedOnly && !share.accepted) {
-          return false;
-        }
-        if (currentFilters.blocksOnly && !share.is_block) {
-          return false;
-        }
+        if (currentFilters.worker && share.worker !== currentFilters.worker) return false;
+        if (currentFilters.acceptedOnly && !share.accepted) return false;
+        if (currentFilters.blocksOnly && !share.is_block) return false;
         return true;
       }
 
-      // Update last update time
       function updateLastUpdateTime() {
-        const now = new Date();
-        document.getElementById("last-update").textContent =
-          now.toLocaleTimeString();
+        document.getElementById("last-update").textContent = new Date().toLocaleTimeString();
       }
 
-      // Setup event listeners
-      document
-        .getElementById("worker-filter")
-        .addEventListener("keypress", (e) => {
-          if (e.key === "Enter") {
-            applyFilters();
-          }
-        });
+      document.getElementById("worker-filter").addEventListener("keypress", (e) => { if (e.key === "Enter") applyFilters(); });
+      document.getElementById("worker-filter").addEventListener("change", updateSearchFieldState);
 
-      // Listen for worker dropdown changes
-      document
-        .getElementById("worker-filter")
-        .addEventListener("change", updateSearchFieldState);
-
-      // Initial setup
       window.addEventListener("load", () => {
-        // Load historical shares from database/buffer first (if available)
-        applyFilters().then(() => {
-          // Populate worker dropdown from loaded shares
-          shares.forEach((share) => {
-            updateWorkerDropdown(share.worker);
-          });
-        });
-        // Connect to WebSocket for real-time updates
+        applyFilters().then(() => { shares.forEach((share) => { updateWorkerDropdown(share.worker); }); });
         connectWebSocket();
         updateStats();
-        // Update stats every 5 seconds
         setInterval(updateStats, 5000);
-        // Update time displays every second
         setInterval(updateTimeCells, 1000);
       });
 
-      // Back link
-      document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape") {
-          window.location.href = "/";
-        }
-      });
+      document.addEventListener("keydown", (e) => { if (e.key === "Escape") window.location.href = "/"; });
     </script>
   </body>
 </html>

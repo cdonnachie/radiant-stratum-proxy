@@ -1,10 +1,10 @@
-# Quick Start: Enable Web Dashboard
+# Dashboard Quick Start
 
-Follow these steps to enable the web dashboard on your mining proxy.
+Get the mining dashboard running in 2 minutes.
 
-## Step 1: Update Configuration
+## 1. Enable Dashboard
 
-Edit your `.env` file and set:
+Add these lines to your `.env` file:
 
 ```bash
 ENABLE_DASHBOARD=true
@@ -12,84 +12,65 @@ DASHBOARD_PORT=8080
 ENABLE_DATABASE=true
 ```
 
-## Step 2: Rebuild and Restart (Docker)
+## 2. Restart the Proxy
+
+**Docker:**
 
 ```bash
-docker-compose down
-docker-compose build
-docker-compose up -d
+docker compose down
+docker compose up -d
 ```
 
-## Step 3: Access Dashboard
+**Native Python:**
 
-Open your browser to: **http://localhost:8080**
+```bash
+# Stop the running proxy (Ctrl+C), then:
+python -m rxd_proxy.run [your options]
+```
 
-Or from another machine: **http://YOUR_SERVER_IP:8080**
+## 3. Access Dashboard
+
+Open in your browser: **http://localhost:8080**
 
 ## What You'll See
 
-- **Live hashrate** of all connected miners
-- **Active miner count** and details
-- **Recent blocks found** (KCN and LCN)
-- **24-hour statistics** (blocks, shares, acceptance rate)
-- **Auto-refreshing** every 5 seconds
+### Main Dashboard
+
+- **Hashrate** - Total pool hashrate from all workers
+- **Workers** - Number of connected miners
+- **Network Difficulty** - Current RXD network difficulty
+- **Block Height** - Current blockchain height
+- **Time to Find** - Estimated time to find a block
+- **Recent Blocks** - Blocks found by the pool
+
+### Shares Page (`/shares.html`)
+
+- Live stream of share submissions
+- Worker names and share difficulties
+- Real-time WebSocket updates
 
 ## Troubleshooting
 
-### Dashboard Won't Load
+**Can't access dashboard?**
 
-1. Check logs:
+- Check `ENABLE_DASHBOARD=true` is set
+- Verify port 8080 is not blocked by firewall
+- Try `http://127.0.0.1:8080` if on same machine
 
-```bash
-docker-compose logs stratum-proxy | grep -i dashboard
-```
+**No statistics showing?**
 
-Should see: `Starting web dashboard on port 8080`
+- Wait for miners to connect and submit shares
+- Ensure `ENABLE_DATABASE=true` for historical data
+- Check proxy logs for errors
 
-2. Verify port mapping in `docker-compose.yml`:
+**Remote access not working?**
 
-```yaml
-ports:
-  - "8080:8080"
-```
+- Ensure Docker is binding to `0.0.0.0` not `127.0.0.1`
+- Check firewall allows port 8080
+- Use your server's IP address, not localhost
 
-### No Statistics Showing
+## Next Steps
 
-Make sure database is enabled:
-
-```bash
-ENABLE_DATABASE=true
-```
-
-Then rebuild:
-
-```bash
-docker-compose down && docker-compose build && docker-compose up -d
-```
-
-## Performance Impact
-
-The dashboard and database have **minimal impact**:
-
-- CPU: <1% overhead
-- RAM: ~10MB additional
-- Disk: ~1MB per month of statistics
-
-## Disabling the Dashboard
-
-To return to minimal mode, set in `.env`:
-
-```bash
-ENABLE_DASHBOARD=false
-ENABLE_DATABASE=false
-```
-
-Then restart:
-
-```bash
-docker-compose restart stratum-proxy
-```
-
----
-
-For complete documentation, see [DASHBOARD.md](DASHBOARD.md)
+- Read [DASHBOARD.md](DASHBOARD.md) for full documentation
+- Configure [notifications](NOTIFICATIONS.md) for block alerts
+- Customize dashboard CSS in `rxd_proxy/web/static/`

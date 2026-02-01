@@ -37,8 +37,7 @@ data/*.db-shm
 data/*.db-wal
 
 # Docker volumes data
-kylacoin-data/
-lyncoin-data/
+radiant-data/
 
 # IDE
 .vscode/
@@ -60,18 +59,13 @@ Thumbs.db
 *.conf.old
 
 # Cryptocurrency binaries (large files, should be downloaded separately)
-binaries/kylacoin/kylacoind
-binaries/kylacoin/kylacoin-cli
-binaries/lyncoin/lyncoind
-binaries/lyncoin/lyncoin-cli
-binaries/kylacoin/*.tar.gz
-binaries/lyncoin/*.tar.gz
-binaries/kylacoin/*.zip
-binaries/lyncoin/*.zip
+binaries/radiant/radiantd
+binaries/radiant/radiant-cli
+binaries/radiant/*.tar.gz
+binaries/radiant/*.zip
 
 # Blockchain data (if accidentally created locally)
-.kylacoin/
-.lyncoin/
+.radiant/
 blockchain_data/
 
 # Test files
