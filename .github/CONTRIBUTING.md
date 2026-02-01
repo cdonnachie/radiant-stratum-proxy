@@ -15,7 +15,7 @@ Thank you for your interest in contributing to the Radiant Stratum Proxy project
 1. **Clone the repository**
 
    ```bash
-   git clone https://github.com/cdonnachie/radiant-stratum-proxy.git
+   git clone https://github.com/Radiant-Core/radiant-stratum-proxy.git
    cd radiant-stratum-proxy
    ```
 

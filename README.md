@@ -214,7 +214,7 @@ MIT License - See LICENSE file
 
 ## Building from Source
 
-Docker automatically builds Radiant from source using https://github.com/cdonnachie/Radiant-Core (a maintained fork).
+Docker automatically builds Radiant from source using https://github.com/Radiant-Core/Radiant-Core (a maintained fork).
 
 ### Build Configuration
 
@@ -239,7 +239,7 @@ sudo apt-get install build-essential cmake ninja-build libboost-all-dev \
     libevent-dev libssl-dev libdb++-dev libminiupnpc-dev libzmq3-dev
 
 # Clone and build
-git clone https://github.com/cdonnachie/Radiant-Core.git
+git clone https://github.com/Radiant-Core/Radiant-Core.git
 cd Radiant-Core
 mkdir build && cd build
 cmake -GNinja .. -DBUILD_RADIANT_QT=OFF
