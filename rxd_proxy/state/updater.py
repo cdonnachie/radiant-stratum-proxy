@@ -132,8 +132,18 @@ async def update_once(state, settings, http: ClientSession, force_update: bool =
         alive = set()
         for sess in list(state.all_sessions):
             try:
-                setattr(sess, "_share_difficulty", difficulty)
-                await sess.send_notification("mining.set_difficulty", (difficulty,))
+                # If VarDiff is enabled, preserve the session's current difficulty
+                # Otherwise use the fixed divisor-based difficulty
+                from ..stratum import vardiff as _vardiff_mod
+                if _vardiff_mod.vardiff_manager is not None:
+                    sess_diff = getattr(sess, "_share_difficulty", None)
+                    if sess_diff is None or sess_diff <= 0:
+                        setattr(sess, "_share_difficulty", difficulty)
+                        await sess.send_notification("mining.set_difficulty", (difficulty,))
+                    # Don't send set_difficulty - VarDiff manages this
+                else:
+                    setattr(sess, "_share_difficulty", difficulty)
+                    await sess.send_notification("mining.set_difficulty", (difficulty,))
                 await sess.send_notification("mining.notify", job_params)
             except Exception as e:
                 state.logger.debug("Dropping dead session %r: %s", sess, e)
@@ -153,6 +163,8 @@ async def update_once(state, settings, http: ClientSession, force_update: bool =
 
         for sess in list(state.new_sessions):
             try:
+                # New sessions get the fixed difficulty initially
+                # VarDiff will adjust after first shares
                 setattr(sess, "_share_difficulty", difficulty)
                 await sess.send_notification("mining.set_difficulty", (difficulty,))
                 await sess.send_notification("mining.notify", job_params)
