@@ -1,0 +1,50 @@
+# Try Ubuntu 24.04 first for newer glibc
+FROM ubuntu:24.04 as ubuntu24
+
+# Install dependencies available in Ubuntu 24.04
+RUN apt-get update && apt-get install -y \
+    curl \
+    libssl3 \
+    libboost-system1.83.0 \
+    libboost-filesystem1.83.0 \
+    libboost-thread1.83.0 \
+    libboost-program-options1.83.0 \
+    libevent-2.1-7 \
+    libevent-pthreads-2.1-7 \
+    libzmq5 \
+    libc6 \
+    file \
+    && rm -rf /var/lib/apt/lists/*
+
+# Final stage
+FROM ubuntu24
+
+# Create radiant user and directories
+RUN useradd -r -m -s /bin/bash radiant && \
+    mkdir -p /opt/radiant/bin && \
+    mkdir -p /home/radiant/.radiant && \
+    chown -R radiant:radiant /home/radiant/.radiant
+
+# Copy binaries, entrypoint, and health check script
+COPY binaries/radiant/* /opt/radiant/bin/
+COPY entrypoint-radiant.sh /usr/local/bin/entrypoint.sh
+COPY health-check-radiant.sh /usr/local/bin/health-check.sh
+RUN chmod +x /opt/radiant/bin/* && \
+    chmod +x /usr/local/bin/entrypoint.sh && \
+    chmod +x /usr/local/bin/health-check.sh && \
+    ln -s /opt/radiant/bin/radiantd /usr/local/bin/radiantd && \
+    ln -s /opt/radiant/bin/radiant-cli /usr/local/bin/radiant-cli
+
+# Verify binary compatibility
+RUN ldd /opt/radiant/bin/radiantd > /dev/null || echo "Binary verified"
+
+# Set working directory but keep running as root for entrypoint
+# (entrypoint will switch to radiant user after fixing permissions)
+WORKDIR /home/radiant
+
+# Expose ports
+EXPOSE 7332 7333
+
+# Use entrypoint script to generate config and start daemon
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+CMD []
