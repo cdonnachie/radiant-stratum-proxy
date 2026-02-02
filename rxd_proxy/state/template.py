@@ -41,7 +41,7 @@ class TemplateState:
         self.logger = logging.getLogger("Stratum-Proxy")
 
     def current_job_params(self):
-        if not (self.coinbase1_nowit and self.coinbase2_nowit):
+        if not (self.coinbase1_nowit and self.coinbase2_nowit and self.prevHash_le and self.bits):
             return None
         return [
             hex(self.job_counter)[2:],

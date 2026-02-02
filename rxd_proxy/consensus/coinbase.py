@@ -6,6 +6,38 @@ from ..utils.hashers import dsha256
 logger = logging.getLogger(__name__)
 
 
+def encode_height_bip34(height: int) -> bytes:
+    """
+    Encode block height for BIP34 coinbase scriptSig.
+    
+    For heights 1-16, uses OP_1 through OP_16 opcodes.
+    For height 0 or heights > 16, uses serialized script number format.
+    
+    This matches the Radiant node's ScriptInt::fromIntUnchecked behavior.
+    """
+    if height == 0:
+        return bytes([0x00])  # OP_0
+    elif 1 <= height <= 16:
+        # OP_1 = 0x51, OP_2 = 0x52, ..., OP_16 = 0x60
+        return bytes([0x50 + height])  # OP_N encoding
+    else:
+        # For heights > 16, use the serialized script number format
+        # Serialize as little-endian, handling sign bit
+        neg = height < 0
+        absvalue = -height if neg else height
+        result = bytearray()
+        while absvalue:
+            result.append(absvalue & 0xff)
+            absvalue >>= 8
+        # Handle sign bit
+        if result[-1] & 0x80:
+            result.append(0x80 if neg else 0)
+        elif neg:
+            result[-1] |= 0x80
+        # Add push opcode for the length
+        return op_push(len(result)) + bytes(result)
+
+
 def build_coinbase(
     pub_h160: bytes,
     height: int,
@@ -19,16 +51,15 @@ def build_coinbase(
     Radiant uses standard Bitcoin-style transactions (no SegWit).
     Transaction version is typically 1 or 2.
     """
-    # Calculate height serialization (BIP34)
-    bytes_needed_sub_1 = 0
-    while True:
-        if height <= (2 ** (7 + (8 * bytes_needed_sub_1))) - 1:
-            break
-        bytes_needed_sub_1 += 1
-    bip34_height = height.to_bytes(bytes_needed_sub_1 + 1, "little")
+    # Encode height for BIP34 (uses OP_N for small values 1-16)
+    bip34_height = encode_height_bip34(height)
+    
+    logger.info(f"Building coinbase for height {height}, BIP34 encoded: {bip34_height.hex()}")
 
+    # Build coinbase scriptSig: height encoding + arbitrary data
+    # Note: bip34_height already includes the opcode/push prefix for heights 1-16
     coinbase_script_without_extranonces = (
-        op_push(len(bip34_height)) + bip34_height + op_push(len(arbitrary)) + arbitrary
+        bip34_height + op_push(len(arbitrary)) + arbitrary
     )
 
     extranonce_placeholder_size = 8

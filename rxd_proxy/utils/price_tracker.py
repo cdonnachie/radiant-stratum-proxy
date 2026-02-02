@@ -116,6 +116,9 @@ class PriceTracker:
                         usd_price = price_data.get("usd")
                         logger.debug(f"{coin_id}: {btc_price} BTC, ${usd_price} USD")
                         return btc_price, usd_price
+                    else:
+                        logger.warning(f"CoinGecko response missing {coin_id}")
+                        return None, None
                 else:
                     logger.warning(f"CoinGecko returned status {resp.status}")
                     return None, None

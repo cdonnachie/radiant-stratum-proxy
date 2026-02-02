@@ -48,12 +48,12 @@ async def get_active_miners():
     if not state:
         return JSONResponse({"miners": [], "total_hashrate_mhs": 0, "miner_count": 0})
 
-    # Block-only mode: if SHARE_DIFFICULTY_DIVISOR <= 1.0, disable hashrate estimation
+    # Check if shares are enabled (static difficulty > 0 means shares are tracked)
     try:
-        divisor_val = float(os.getenv("SHARE_DIFFICULTY_DIVISOR", "1000"))
+        static_diff = float(os.getenv("STATIC_SHARE_DIFFICULTY", "1.0"))
     except ValueError:
-        divisor_val = 1000.0
-    if divisor_val <= 1.0:
+        static_diff = 1.0
+    if static_diff <= 0:
         miners_disabled = []
         now_ts = time.time()
         for session in state.all_sessions:
@@ -254,7 +254,7 @@ async def get_blocks(limit: int = 100, offset: int = 0):
 
 
 @app.get("/api/blocks/confirmations")
-async def get_block_confirmations(chain: str = None, limit: int = 50):
+async def get_block_confirmations(chain: str | None = None, limit: int = 50):
     """Get block confirmation status for pending/confirmed blocks"""
     try:
         from ..db.schema import get_block_confirmation_status
@@ -282,7 +282,7 @@ async def get_block_confirmations(chain: str = None, limit: int = 50):
 
 
 @app.get("/api/blocks/pending")
-async def get_pending_blocks(chain: str = None):
+async def get_pending_blocks(chain: str | None = None):
     """Get pending blocks awaiting confirmation"""
     try:
         from ..db.schema import get_pending_blocks
@@ -536,6 +536,7 @@ async def get_stats(hours: int = 24):
 async def get_payout_info():
     """Get payout address information"""
     import os
+    from ..config import Settings
 
     payout_info = {
         "rxd_address": None,
@@ -548,7 +549,8 @@ async def get_payout_info():
             # Reconstruct the address from the stored pub_h160
             import base58
 
-            version = 111 if getattr(state, "testnet", False) else 0
+            settings = Settings()
+            version = 111 if settings.testnet else 0
             rxd_address = base58.b58encode_check(
                 bytes([version]) + state.pub_h160
             ).decode()
@@ -643,7 +645,7 @@ async def clear_best_shares():
 
 
 @app.get("/api/shares/summary")
-async def get_share_stats(worker: str = None, minutes: int = 10):
+async def get_share_stats(worker: str | None = None, minutes: int = 10):
     """Get recent share statistics for debugging hashrate calculation"""
     try:
         from ..db.schema import get_recent_share_stats
@@ -746,7 +748,7 @@ async def get_system_config():
         },
         "stratum": {
             "port": int(os.getenv("STRATUM_PORT", "54321")),
-            "share_divisor": float(os.getenv("SHARE_DIFFICULTY_DIVISOR", "1000")),
+            "static_difficulty": float(os.getenv("STATIC_SHARE_DIFFICULTY", "1.0")),
         },
     }
     return JSONResponse(config_data)
@@ -1262,7 +1264,7 @@ async def get_shares_stats():
 
 
 @app.get("/api/blocks/export/json")
-async def export_blocks_json(chain: str = None):
+async def export_blocks_json(chain: str | None = None):
     """Export all blocks as JSON file"""
     try:
         from ..db.schema import get_recent_blocks
@@ -1317,7 +1319,7 @@ async def export_blocks_json(chain: str = None):
 
 
 @app.get("/api/blocks/export/csv")
-async def export_blocks_csv(chain: str = None):
+async def export_blocks_csv(chain: str | None = None):
     """Export all blocks as CSV file"""
     try:
         from ..db.schema import get_recent_blocks

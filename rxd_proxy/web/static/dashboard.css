@@ -643,7 +643,7 @@ tbody tr td a.hash-link {
 
 @media (max-width: 1050px) {
   .stats-grid {
-    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   }
   #daemon-status-content .stats-grid {
     grid-template-columns: 1fr !important;
@@ -660,8 +660,14 @@ tbody tr td a.hash-link {
   body {
     padding-top: 12px;
   }
+  .container {
+    padding: 0 12px;
+  }
   .stat-card {
     padding: 16px 18px;
+  }
+  .section {
+    padding: 18px 16px;
   }
   /* Stack daemon status cards to 1 column on tablets and large phones */
   #daemon-status-content .stats-grid {
@@ -670,6 +676,13 @@ tbody tr td a.hash-link {
 }
 
 @media (max-width: 560px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  .stat-card {
+    padding: 14px 16px;
+  }
   .stat-card .value {
     font-size: 1.75em;
   }

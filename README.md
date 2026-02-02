@@ -23,11 +23,30 @@ Choose your setup method:
 
 The Docker setup automatically builds Radiant from source - no need to download binaries!
 
-1. **Configure environment**:
+1. **Configure environment** (choose based on your hardware):
 
+   **Linux/macOS:**
    ```bash
-   cp .env.example .env
-   # Edit .env - set RPC password
+   # For ASIC miners (IceRiver, etc.) - RECOMMENDED for solo mining
+   cp .env.example.asic .env
+
+   # For GPU miners (testing/development)
+   cp .env.example.gpu .env
+
+   # Then edit .env - set a secure RPC password
+   nano .env
+   ```
+
+   **Windows (PowerShell):**
+   ```powershell
+   # For ASIC miners (IceRiver, etc.) - RECOMMENDED for solo mining
+   Copy-Item .env.example.asic .env
+
+   # For GPU miners (testing/development)
+   Copy-Item .env.example.gpu .env
+
+   # Then edit .env - set a secure RPC password
+   notepad .env
    ```
 
 2. **Start services** (first build takes ~10-15 minutes to compile Radiant):
@@ -38,14 +57,15 @@ The Docker setup automatically builds Radiant from source - no need to download 
    ```
    **Note**: First build compiles Radiant from source (https://github.com/Radiant-Core/Radiant-Core). 
    Subsequent starts are instant since the image is cached.
-4. **Connect miner**:
+
+3. **Connect miner**:
    - Server: `localhost:54321`
    - Username: Your Radiant address
    - Password: anything
 
 ### Option 2: Native Python (Your Own Node)
 
-**Prerequisites:** Python 3.8+, running radiantd node
+**Prerequisites:** Python 3.10+, running radiantd node
 
 1. **Configure blockchain node**:
 
@@ -61,10 +81,19 @@ The Docker setup automatically builds Radiant from source - no need to download 
 
 3. **Configure proxy**:
 
+   **Linux/macOS:**
    ```bash
-   cp .env.example .env
-   # Edit .env to match your node RPC settings
+   cp .env.example.gpu .env   # For GPU miners
+   cp .env.example.asic .env  # For ASIC miners
    ```
+
+   **Windows (PowerShell):**
+   ```powershell
+   Copy-Item .env.example.gpu .env   # For GPU miners
+   Copy-Item .env.example.asic .env  # For ASIC miners
+   ```
+
+   Then edit `.env` to match your node RPC settings.
 
 4. **Run proxy**:
 
@@ -83,7 +112,7 @@ The Docker setup automatically builds Radiant from source - no need to download 
 | `RXD_RPC_PORT`                  | Radiant RPC port                   | 7332               |
 | `RXD_RPC_USER` / `RXD_RPC_PASS` | Radiant RPC credentials            | -                  |
 | `STRATUM_PORT`                  | Port for miners to connect         | 54321              |
-| `SHARE_DIFFICULTY_DIVISOR`      | Share difficulty (higher = easier) | 1.0                |
+| `STATIC_SHARE_DIFFICULTY`       | Share difficulty (GPU=1, ASIC=512) | 512.0              |
 | `USE_EASIER_TARGET`             | Use easier target for shares       | true               |
 | `ENABLE_ZMQ`                    | Enable ZMQ block notifications     | true               |
 | `DISCORD_WEBHOOK_URL`           | Discord webhook for notifications  | (blank = disabled) |
@@ -97,11 +126,12 @@ See [NOTIFICATIONS.md](NOTIFICATIONS.md) for notification setup and [DASHBOARD.m
 
 ### Share Difficulty
 
-`SHARE_DIFFICULTY_DIVISOR` controls how often miners submit shares:
+`STATIC_SHARE_DIFFICULTY` sets the exact difficulty for shares:
 
-- **Higher** (e.g., 2.0): Easier shares, more frequent, better for low hashrate
-- **Lower** (e.g., 0.5): Harder shares, less traffic, better for high hashrate
-- **Default (1.0)**: Network difficulty
+- **GPU (1.0)**: Frequent shares for hashrate tracking
+- **ASIC (512.0)**: Higher difficulty for IceRiver RX0 (300 GH/s)
+
+With VarDiff enabled (recommended), this is only used as fallback.
 
 ## Radiant Mining
 
@@ -152,7 +182,7 @@ docker compose logs -f stratum-proxy
 
 **Miner can't connect**: Check firewall, verify STRATUM_PORT is correct
 
-**Low hashrate**: Adjust `SHARE_DIFFICULTY_DIVISOR` for more frequent feedback
+**Low hashrate**: Adjust `STATIC_SHARE_DIFFICULTY` for more frequent feedback
 
 **Build fails**: Ensure Docker has enough memory (4GB+ recommended for compilation)
 
@@ -172,9 +202,21 @@ Enable automatic difficulty adjustment per miner:
 
 ```bash
 ENABLE_VARDIFF=true
-VARDIFF_TARGET_SHARE_TIME=15.0  # Target seconds between shares
-VARDIFF_MIN_DIFFICULTY=0.00001
-VARDIFF_MAX_DIFFICULTY=0.1
+VARDIFF_TARGET_SHARE_TIME=15.0    # Target seconds between shares
+VARDIFF_MIN_DIFFICULTY=100.0      # Minimum difficulty floor
+VARDIFF_MAX_DIFFICULTY=10000000.0 # Maximum difficulty ceiling
+VARDIFF_START_DIFFICULTY=10000.0  # Initial difficulty for new miners
+```
+
+Additional tuning options (see `.env.example.gpu` or `.env.example.asic` for full list):
+
+```bash
+VARDIFF_RETARGET_SHARES=20        # Shares before retargeting
+VARDIFF_RETARGET_TIME=300.0       # Max seconds before retargeting
+VARDIFF_UP_STEP=2.0               # Multiplier when increasing difficulty
+VARDIFF_DOWN_STEP=0.5             # Multiplier when decreasing difficulty
+VARDIFF_STATE_PATH=data/vardiff_state.json  # Persist difficulty between restarts
+VARDIFF_CHAIN_HEADROOM=0.9        # Fraction of chain difficulty as upper cap
 ```
 
 ### Project Structure
@@ -182,6 +224,7 @@ VARDIFF_MAX_DIFFICULTY=0.1
 ```
 rxd_proxy/
 ├── consensus/    # Block/transaction building
+├── db/           # Database schema and queries
 ├── rpc/          # RPC client implementations
 ├── state/        # Template state management
 ├── stratum/      # Stratum protocol server
@@ -194,9 +237,9 @@ rxd_proxy/
 
 MIT License - See LICENSE file
 
-## Configuration
+## All Environment Variables
 
-### Environment Variables
+### Core Settings
 
 | Variable                   | Description                                            | Default                    |
 | -------------------------- | ------------------------------------------------------ | -------------------------- |
@@ -207,10 +250,39 @@ MIT License - See LICENSE file
 | `STRATUM_PORT`             | Stratum proxy port                                     | 54321                      |
 | `PROXY_SIGNATURE`          | Custom coinbase signature                              | /radiant-stratum-proxy/    |
 | `USE_EASIER_TARGET`        | Enable easier target selection                         | true                       |
-| `SHARE_DIFFICULTY_DIVISOR` | Share difficulty divisor (higher = easier/more shares) | 1.0                        |
+| `STATIC_SHARE_DIFFICULTY`  | Static share difficulty (GPU=1, ASIC=512)              | 512.0                      |
 | `TESTNET`                  | Use testnet                                            | false                      |
 | `LOG_LEVEL`                | Logging level (DEBUG, INFO, WARNING, ERROR)            | INFO                       |
 | `SHOW_JOBS`                | Show job updates in logs                               | false                      |
+| `ENABLE_ZMQ`               | Enable ZMQ block notifications                         | true                       |
+| `RXD_ZMQ_ENDPOINT`         | ZMQ endpoint URL                                       | tcp://radiant:28332        |
+| `ENABLE_DASHBOARD`         | Enable web dashboard                                   | false                      |
+| `DASHBOARD_PORT`           | Web dashboard port                                     | 8080                       |
+| `ENABLE_DATABASE`          | Enable statistics database                             | false                      |
+| `DISCORD_WEBHOOK_URL`      | Discord webhook for notifications                      | (blank = disabled)         |
+| `TELEGRAM_BOT_TOKEN`       | Telegram bot token                                     | (blank = disabled)         |
+| `TELEGRAM_CHAT_ID`         | Telegram chat ID                                       | (blank = disabled)         |
+
+### Variable Difficulty Settings
+
+| Variable                        | Description                                    | Default              |
+| ------------------------------- | ---------------------------------------------- | -------------------- |
+| `ENABLE_VARDIFF`                | Enable variable difficulty per miner           | false                |
+| `VARDIFF_TARGET_SHARE_TIME`     | Target seconds between shares                  | 15.0                 |
+| `VARDIFF_MIN_DIFFICULTY`        | Minimum difficulty floor                       | 100.0                |
+| `VARDIFF_MAX_DIFFICULTY`        | Maximum difficulty ceiling                     | 10000000.0           |
+| `VARDIFF_START_DIFFICULTY`      | Initial difficulty for new miners              | 10000.0              |
+| `VARDIFF_RETARGET_SHARES`       | Shares before retargeting                      | 20                   |
+| `VARDIFF_RETARGET_TIME`         | Max seconds before retargeting                 | 300.0                |
+| `VARDIFF_UP_STEP`               | Multiplier when increasing difficulty          | 2.0                  |
+| `VARDIFF_DOWN_STEP`             | Multiplier when decreasing difficulty          | 0.5                  |
+| `VARDIFF_EMA_ALPHA`             | EMA smoothing factor                           | 0.3                  |
+| `VARDIFF_INACTIVITY_LOWER`      | Seconds before inactivity drop                 | 90.0                 |
+| `VARDIFF_INACTIVITY_MULTIPLES`  | Multiples of target time for inactivity        | 6.0                  |
+| `VARDIFF_INACTIVITY_DROP_FACTOR`| Factor to reduce difficulty on inactivity      | 0.5                  |
+| `VARDIFF_STATE_PATH`            | Path to persist difficulty state               | data/vardiff_state.json |
+| `VARDIFF_WARM_START_MINUTES`    | Minutes to use saved difficulty on restart     | 60                   |
+| `VARDIFF_CHAIN_HEADROOM`        | Fraction of chain difficulty as upper cap      | 0.9                  |
 
 ## Building from Source
 
@@ -296,7 +368,7 @@ If you prefer to run the proxy directly with Python instead of using Docker:
 
 #### Prerequisites
 
-1. **Python 3.8+** installed on your system
+1. **Python 3.10+** installed on your system
 2. **Radiant node** running separately (either locally or remotely)
 3. **Python dependencies** installed
 
@@ -400,12 +472,16 @@ docker compose down
 
 ### Update Configuration
 
+**Linux/macOS:**
 ```bash
-# Edit environment
 nano .env
-
-# Restart services
 docker compose down && docker compose up -d
+```
+
+**Windows (PowerShell):**
+```powershell
+notepad .env
+docker compose down; docker compose up -d
 ```
 
 ### Mining
@@ -557,7 +633,8 @@ docker compose exec -u radiant radiant radiant-cli getmininginfo
 ```
 radiant-stratum-proxy/
 ├── docker-compose.yml       # Main compose file
-├── .env.example             # Example environment configuration
+├── .env.example.gpu         # GPU mining configuration template
+├── .env.example.asic        # ASIC mining configuration template
 ├── .gitignore               # Git ignore rules
 ├── Dockerfile               # Proxy container build
 ├── Dockerfile.radiant       # Radiant node container (builds from source)
@@ -570,6 +647,7 @@ radiant-stratum-proxy/
 │   └── radiant.conf         # Radiant daemon config template
 ├── rxd_proxy/               # Proxy application package
 │   ├── consensus/           # Block/transaction building
+│   ├── db/                  # Database schema and queries
 │   ├── rpc/                 # RPC client implementations
 │   ├── state/               # Template state management
 │   ├── stratum/             # Stratum protocol server

@@ -298,7 +298,8 @@ async def cleanup_on_startup():
         cursor = await db.execute(
             "SELECT COUNT(*) FROM connections WHERE timestamp < ?", (week_ago,)
         )
-        old_connections = (await cursor.fetchone())[0]
+        count_row = await cursor.fetchone()
+        old_connections = count_row[0] if count_row else 0
 
         if old_connections > 0:
             await db.execute("DELETE FROM connections WHERE timestamp < ?", (week_ago,))
@@ -311,7 +312,8 @@ async def cleanup_on_startup():
         cursor = await db.execute(
             "SELECT COUNT(*) FROM share_stats WHERE timestamp < ?", (day_ago,)
         )
-        old_shares = (await cursor.fetchone())[0]
+        count_row = await cursor.fetchone()
+        old_shares = count_row[0] if count_row else 0
 
         if old_shares > 0:
             await db.execute("DELETE FROM share_stats WHERE timestamp < ?", (day_ago,))
@@ -399,7 +401,8 @@ async def seed_block_confirmations_from_blocks():
             )
         """
         )
-        untracked = (await cursor.fetchone())[0]
+        count_row = await cursor.fetchone()
+        untracked = count_row[0] if count_row else 0
 
         if untracked > 0:
             logger.info(
@@ -698,8 +701,8 @@ async def get_stats_summary(hours: int = 24):
             (cutoff,),
         )
         row = await cursor.fetchone()
-        accepted = row[0] or 0
-        rejected = row[1] or 0
+        accepted = row[0] if row else 0
+        rejected = row[1] if row else 0
         total_shares = accepted + rejected
         acceptance_rate = (accepted / total_shares * 100) if total_shares > 0 else None
 
@@ -737,7 +740,8 @@ async def get_stats_summary(hours: int = 24):
             """,
                 (last_block_time,),
             )
-            shares_since_last_block = (await cursor.fetchone())[0] or 0
+            result_row = await cursor.fetchone()
+            shares_since_last_block = (result_row[0] or 0) if result_row else 0
 
         return {
             "blocks": blocks_by_chain,
@@ -752,7 +756,7 @@ async def get_stats_summary(hours: int = 24):
         }
 
 
-async def get_recent_share_stats(worker: str = None, minutes: int = 10):
+async def get_recent_share_stats(worker: str | None = None, minutes: int = 10):
     """Get recent share statistics for hashrate verification"""
     import time
 
@@ -791,7 +795,7 @@ async def record_best_share(
     share_difficulty: float,
     target_difficulty: float,
     timestamp: int,
-    miner_software: str = None,
+    miner_software: str | None = None,
 ):
     """Record a potential best share if it qualifies"""
     try:
@@ -806,7 +810,8 @@ async def record_best_share(
                 """,
                 (chain, share_difficulty),
             )
-            better_shares = (await cursor.fetchone())[0]
+            count_row = await cursor.fetchone()
+            better_shares = count_row[0] if count_row else 0
 
             cursor = await db.execute(
                 """
@@ -814,7 +819,8 @@ async def record_best_share(
                 """,
                 (chain,),
             )
-            total_shares = (await cursor.fetchone())[0]
+            count_row = await cursor.fetchone()
+            total_shares = count_row[0] if count_row else 0
 
             # Only store if it's in top 10 or we have less than 10 shares
             if better_shares < 10:
@@ -862,7 +868,7 @@ async def record_best_share(
         logger.error(f"Error recording best share: {e}")
 
 
-async def get_best_shares(chain: str = None, limit: int = 10):
+async def get_best_shares(chain: str | None = None, limit: int = 10):
     """Get best shares, optionally filtered by chain"""
     async with aiosqlite.connect(DB_PATH) as db:
         db.row_factory = aiosqlite.Row
@@ -1067,7 +1073,7 @@ async def get_hashrate_history(hours: int = 24):
         return result
 
 
-async def record_miner_session(worker_name: str, miner_software: str = None):
+async def record_miner_session(worker_name: str, miner_software: str | None = None):
     """Record or update a miner session"""
     import time
 
@@ -1107,7 +1113,7 @@ async def get_connected_miners(offset: int = 0, limit: int = 20):
             "SELECT COUNT(*) as count FROM miner_sessions WHERE is_connected = 1"
         )
         row = await cursor.fetchone()
-        total = row["count"]
+        total = row["count"] if row else 0
 
         # Get paginated results
         cursor = await db.execute(
@@ -1144,7 +1150,7 @@ async def get_disconnected_miners(hours: int = 24, offset: int = 0, limit: int =
             (cutoff,),
         )
         row = await cursor.fetchone()
-        total = row["count"]
+        total = row["count"] if row else 0
 
         # Get paginated results
         cursor = await db.execute(
@@ -1281,7 +1287,7 @@ async def update_block_confirmations(
 async def check_block_confirmations(
     chain: str,
     get_confirmations_func,
-    node_url: str = None,
+    node_url: str | None = None,
     notification_manager=None,
     skip_notifications: bool = False,
 ):
@@ -1397,7 +1403,7 @@ async def check_block_confirmations(
         await db.commit()
 
 
-async def get_pending_blocks(chain: str = None):
+async def get_pending_blocks(chain: str | None = None):
     """Get all pending blocks awaiting confirmation"""
     async with aiosqlite.connect(DB_PATH) as db:
         db.row_factory = aiosqlite.Row
@@ -1424,7 +1430,7 @@ async def get_pending_blocks(chain: str = None):
         return [dict(row) for row in blocks]
 
 
-async def get_block_confirmation_status(chain: str = None, limit: int = 50):
+async def get_block_confirmation_status(chain: str | None = None, limit: int = 50):
     """Get recent block confirmation statuses"""
     async with aiosqlite.connect(DB_PATH) as db:
         db.row_factory = aiosqlite.Row

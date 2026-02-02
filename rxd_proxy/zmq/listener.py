@@ -74,6 +74,8 @@ class ZMQListener:
         max_consecutive_errors = 5
 
         while self._running:
+            if not self.socket:
+                break
             try:
                 # Receive multipart message: [topic, data, sequence]
                 parts = await self.socket.recv_multipart()
@@ -172,7 +174,7 @@ class ZMQListener:
     @property
     def is_running(self) -> bool:
         """Check if the listener is currently running"""
-        return self._running and self._task and not self._task.done()
+        return bool(self._running and self._task and not self._task.done())
 
     def __repr__(self):
         return f"ZMQListener(name='{self.name}', endpoint='{self.zmq_endpoint}', running={self._running})"

@@ -122,6 +122,8 @@ class NotificationManager:
         miner_software: Optional[str],
     ):
         """Send Discord webhook notification with rich embed for block finds"""
+        if not self.discord_webhook:
+            return
 
         # Determine color based on chain (green for RXD)
         color = 0x00FF00  # Green for RXD
@@ -181,6 +183,8 @@ class NotificationManager:
         connected: bool,
     ):
         """Send Discord webhook notification for miner connection/disconnection"""
+        if not self.discord_webhook:
+            return
 
         # Blue for connection, gray for disconnection
         color = 0x0099FF if connected else 0x808080
@@ -407,6 +411,25 @@ class NotificationManager:
 
         await self._post_discord_embed(embed)
         logger.warning("%s block %d marked as orphaned", chain, height)
+
+    async def _post_discord_embed(self, embed: dict):
+        """Helper to post a Discord embed via webhook"""
+        if not self.discord_webhook:
+            return
+
+        payload = {"embeds": [embed], "username": "Mining Bot"}
+
+        async with aiohttp.ClientSession() as session:
+            async with session.post(
+                self.discord_webhook,
+                json=payload,
+                headers={"Content-Type": "application/json"},
+            ) as response:
+                if response.status != 204:
+                    error_text = await response.text()
+                    raise Exception(
+                        f"Discord webhook failed: {response.status} - {error_text}"
+                    )
 
     async def _send_telegram_block_confirmed(
         self,

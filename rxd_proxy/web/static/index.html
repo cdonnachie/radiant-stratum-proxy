@@ -348,28 +348,28 @@
 
       <div class="status-bar" id="status-bar" style="margin-top: 30px; padding: 16px 24px; background: rgba(255, 255, 255, 0.05); border-radius: 8px; display: flex; flex-wrap: wrap; gap: 24px; align-items: center; font-size: 0.85em; border: 1px solid rgba(255, 255, 255, 0.1);">
         <div style="font-weight: 600; opacity: 0.7; margin-right: 8px">System Configuration:</div>
-        <div id="status-vardiff" class="status-item" style="display: none">
-          <span style="color: #00F2F2; margin-right: 4px">●</span>
-          <span title="Variable difficulty is enabled">VarDiff</span>
-          <span class="status-detail" style="opacity: 0.6; margin-left: 6px; font-size: 0.9em"></span>
+        <div id="status-vardiff" class="status-item" style="display: none;">
+          <span style="color: #00F2F2; margin-right: 6px; font-size: 0.6em; vertical-align: middle;">●</span>
+          <span title="Variable difficulty is enabled" style="vertical-align: middle;">VarDiff</span>
+          <span class="status-detail" style="opacity: 0.6; margin-left: 6px; font-size: 0.9em; vertical-align: middle;"></span>
         </div>
-        <div id="status-zmq" class="status-item" style="display: none">
-          <span style="color: #00F2F2; margin-right: 4px">●</span>
-          <span title="ZeroMQ block notifications enabled">ZMQ</span>
+        <div id="status-zmq" class="status-item" style="display: none;">
+          <span style="color: #00F2F2; margin-right: 6px; font-size: 0.6em; vertical-align: middle;">●</span>
+          <span title="ZeroMQ block notifications enabled" style="vertical-align: middle;">ZMQ</span>
         </div>
-        <div id="status-notifications" class="status-item" style="display: none">
-          <span style="color: #00F2F2; margin-right: 4px">●</span>
-          <span>Notifications</span>
-          <span class="status-detail" style="opacity: 0.6; margin-left: 6px; font-size: 0.9em"></span>
+        <div id="status-notifications" class="status-item" style="display: none;">
+          <span style="color: #00F2F2; margin-right: 6px; font-size: 0.6em; vertical-align: middle;">●</span>
+          <span style="vertical-align: middle;">Notifications</span>
+          <span class="status-detail" style="opacity: 0.6; margin-left: 6px; font-size: 0.9em; vertical-align: middle;"></span>
         </div>
-        <div id="status-database" class="status-item" style="display: none">
-          <span style="color: #00F2F2; margin-right: 4px">●</span>
-          <span title="Database logging enabled">Database</span>
+        <div id="status-database" class="status-item" style="display: none;">
+          <span style="color: #00F2F2; margin-right: 6px; font-size: 0.6em; vertical-align: middle;">●</span>
+          <span title="Database logging enabled" style="vertical-align: middle;">Database</span>
         </div>
-        <div id="status-stratum" class="status-item" style="display: none">
-          <span style="color: #00F2F2; margin-right: 4px">●</span>
-          <span title="Stratum server port">Port:</span>
-          <span class="status-detail" style="margin-left: 4px; font-weight: 500">—</span>
+        <div id="status-stratum" class="status-item" style="display: none;">
+          <span style="color: #00F2F2; margin-right: 6px; font-size: 0.6em; vertical-align: middle;">●</span>
+          <span title="Stratum server port" style="vertical-align: middle;">Port:</span>
+          <span class="status-detail" style="margin-left: 4px; font-weight: 500; vertical-align: middle;">—</span>
         </div>
         <div id="status-loading" style="opacity: 0.5; font-style: italic">Loading configuration...</div>
       </div>
@@ -418,6 +418,17 @@
         return diff.toFixed(8);
       }
 
+      // Convert stratum difficulty to miner-style "work" display (diff * 2^32)
+      function formatMinerDifficulty(stratumDiff) {
+        if (stratumDiff == null) return "—";
+        const work = stratumDiff * 4294967296; // 2^32
+        if (work >= 1e12) return (work / 1e12).toFixed(2) + " TH";
+        if (work >= 1e9) return (work / 1e9).toFixed(2) + " GH";
+        if (work >= 1e6) return (work / 1e6).toFixed(2) + " MH";
+        if (work >= 1e3) return (work / 1e3).toFixed(2) + " KH";
+        return work.toFixed(0) + " H";
+      }
+
       function formatUptime(seconds) {
         const hours = Math.floor(seconds / 3600);
         const minutes = Math.floor((seconds % 3600) / 60);
@@ -441,14 +452,6 @@
         if (!hash) return "";
         if (hash.length <= 20) return hash;
         return hash.substring(0, 10) + "..." + hash.substring(hash.length - 10);
-      }
-
-      function formatDifficulty(difficulty) {
-        if (!difficulty || difficulty === 0) return "—";
-        if (difficulty >= 1_000_000_000) return (difficulty / 1_000_000_000).toFixed(2) + " G";
-        if (difficulty >= 1_000_000) return (difficulty / 1_000_000).toFixed(2) + " M";
-        if (difficulty >= 1_000) return (difficulty / 1_000).toFixed(2) + " K";
-        return difficulty.toFixed(8);
       }
 
       function formatRatio(ratio) {
@@ -599,13 +602,13 @@
           const tbody = document.getElementById("miners-body");
           if (pageMiners.length === 0) tbody.innerHTML = '<tr><td colspan="6" class="no-data">No miners connected</td></tr>';
           else tbody.innerHTML = pageMiners.map((miner) => {
-            const diffCell = miner.assigned_difficulty != null ? formatDifficulty(miner.assigned_difficulty) : "—";
+            const diffCell = miner.assigned_difficulty != null ? formatMinerDifficulty(miner.assigned_difficulty) : "—";
             let shareIntvlDisplay = "—";
             if (miner.share_blended_interval != null && miner.share_blended_interval > 0 && miner.target_interval) {
               const blended = miner.share_blended_interval, target = miner.target_interval, pct = (blended / target) * 100;
               shareIntvlDisplay = `${blended.toFixed(1)}s<br/><span style="opacity:.7;font-size:.7em">${pct.toFixed(0)}%</span>`;
             }
-            return `<tr><td title="${miner.worker}">${displayWorker(miner.worker)}</td><td>${miner.software || ""}</td><td class="col-num">${diffCell}</td><td class="col-num">${formatHashrate(miner)}</td><td class="col-num">${shareIntvlDisplay}</td><td class="col-num">${formatUptime(miner.uptime_seconds || 0)}</td></tr>`;
+            return `<tr><td title="${miner.worker}">${displayWorker(miner.worker)}</td><td>${miner.software || ""}</td><td class="col-num" title="Stratum diff: ${miner.assigned_difficulty}">${diffCell}</td><td class="col-num">${formatHashrate(miner)}</td><td class="col-num">${shareIntvlDisplay}</td><td class="col-num">${formatUptime(miner.uptime_seconds || 0)}</td></tr>`;
           }).join("");
           updateMinersPaginationControls();
         } catch (error) { console.error("Error fetching miners:", error); }
@@ -742,7 +745,7 @@
           if (data.rxd_address) {
             const explorerUrl = "https://radiantexplorer.com/address/" + data.rxd_address;
             const sourceText = data.rxd_source === "first_miner" ? "Set by first connected miner" : data.rxd_source;
-            container.innerHTML = `<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;"><span class="badge badge-rxd">RXD</span><div class="copy-wrap" title="${data.rxd_address}"><a class="hash-link" href="${explorerUrl}" target="_blank" rel="noopener">${data.rxd_address}</a><button class="copy-btn" onclick="copyToClipboard('${data.rxd_address}', this)">Copy</button></div><span style="opacity:0.6;font-size:0.85em">(${sourceText})</span></div>`;
+            container.innerHTML = `<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;"><span class="badge badge-rxd">RXD</span><div class="copy-wrap" style="min-width:0;flex:1 1 auto;overflow:hidden;" title="${data.rxd_address}"><a class="hash-link" style="word-break:break-all;overflow-wrap:anywhere;" href="${explorerUrl}" target="_blank" rel="noopener">${data.rxd_address}</a><button class="copy-btn" onclick="copyToClipboard('${data.rxd_address}', this)">Copy</button></div></div><div style="opacity:0.6;font-size:0.85em;margin-top:8px;">(${sourceText})</div>`;
           } else {
             container.innerHTML = '<span class="no-data">Waiting for first miner to connect...</span>';
           }
@@ -769,14 +772,14 @@
 
       async function updateConfig() {
         try {
-          const response = await fetch("/api/config");
+          const response = await fetch("/api/system/config");
           const data = await response.json();
           document.getElementById("status-loading").style.display = "none";
-          if (data.vardiff?.enabled) { const el = document.getElementById("status-vardiff"); el.style.display = "flex"; el.querySelector(".status-detail").textContent = `(target ${data.vardiff.target_share_time}s)`; }
+          if (data.vardiff?.enabled) { const el = document.getElementById("status-vardiff"); el.style.display = "flex"; el.querySelector(".status-detail").textContent = `(target ${data.vardiff.target_interval}s)`; }
           if (data.zmq?.enabled) document.getElementById("status-zmq").style.display = "flex";
           if (data.notifications?.discord || data.notifications?.telegram) { const el = document.getElementById("status-notifications"); el.style.display = "flex"; const channels = []; if (data.notifications.discord) channels.push("Discord"); if (data.notifications.telegram) channels.push("Telegram"); el.querySelector(".status-detail").textContent = `(${channels.join(", ")})`; }
           if (data.database?.enabled) document.getElementById("status-database").style.display = "flex";
-          if (data.stratum_port) { const el = document.getElementById("status-stratum"); el.style.display = "flex"; el.querySelector(".status-detail").textContent = data.stratum_port; }
+          if (data.stratum?.port) { const el = document.getElementById("status-stratum"); el.style.display = "flex"; el.querySelector(".status-detail").textContent = data.stratum.port; }
         } catch (error) { console.error("Error fetching config:", error); }
       }
 

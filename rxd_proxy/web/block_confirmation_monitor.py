@@ -102,7 +102,7 @@ class BlockConfirmationMonitor:
                 # Get all pending blocks
                 pending_rxd = await get_pending_blocks("RXD")
 
-                if pending_rxd:
+                if pending_rxd and self.node_url:
                     logger.info(
                         f"Checking confirmations for {len(pending_rxd)} RXD blocks"
                     )

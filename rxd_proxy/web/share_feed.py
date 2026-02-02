@@ -241,7 +241,8 @@ class ShareFeedManager:
                         async with db.execute(
                             count_query, count_params
                         ) as count_cursor:
-                            total = (await count_cursor.fetchone())[0]
+                            count_row = await count_cursor.fetchone()
+                            total = count_row[0] if count_row else 0
 
                         # Convert rows to share dicts (if table exists and has data)
                         if rows:

@@ -79,3 +79,4 @@ temp/
 *.tmp
 data/vardiff_state.json
 cleanup_confirmations.py
+data/testnet/mining.db

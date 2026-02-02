@@ -1,7 +1,7 @@
 """Mining earnings and revenue calculations for Radiant (RXD)"""
 
 import logging
-from typing import Dict, Optional
+from typing import Any, Dict, Optional
 
 logger = logging.getLogger("EarningsCalc")
 
@@ -53,7 +53,7 @@ class EarningsCalculator:
         rxd_price_btc: Optional[float] = None,
         rxd_price_usd: Optional[float] = None,
         rxd_block_reward: Optional[float] = None,
-    ) -> Dict[str, any]:
+    ) -> Dict[str, Any]:
         """
         Calculate estimated daily earnings for Radiant mining.
 
@@ -106,7 +106,7 @@ class EarningsCalculator:
         return result
 
     @staticmethod
-    def format_earnings_display(earnings_data: Dict[str, any]) -> str:
+    def format_earnings_display(earnings_data: Dict[str, Any]) -> str:
         """
         Format earnings data for display.
 

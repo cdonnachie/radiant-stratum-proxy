@@ -36,6 +36,7 @@ async def start_server(state, settings):
                 target_share_time=settings.vardiff_target_interval,
                 min_difficulty=settings.vardiff_min_difficulty,
                 max_difficulty=settings.vardiff_max_difficulty,
+                start_difficulty=settings.vardiff_start_difficulty,
                 retarget_shares=settings.vardiff_retarget_shares,
                 retarget_time=settings.vardiff_retarget_time,
                 down_step=settings.vardiff_down_step,
@@ -58,14 +59,16 @@ async def start_server(state, settings):
             except Exception as e:
                 logger.debug("Initial vardiff tick failed: %s", e)
 
-            # Periodic tick task
+            # Periodic tick task - capture local reference to avoid None check issues
+            manager = _vardiff_mod.vardiff_manager
+
             async def _vardiff_tick_loop():
                 import asyncio
 
                 while True:
                     try:
                         await asyncio.sleep(30)
-                        await _vardiff_mod.vardiff_manager.tick()
+                        await manager.tick()
                     except Exception as e:
                         logger.debug("Periodic vardiff tick failed: %s", e)
 
@@ -78,7 +81,7 @@ async def start_server(state, settings):
         state,
         settings.testnet,
         settings.node_url,
-        settings.share_difficulty_divisor,
+        settings.static_share_difficulty,
         notification_manager,
     )
     server = await serve_rs(factory, settings.ip, settings.port, reuse_address=True)

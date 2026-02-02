@@ -40,10 +40,13 @@ class VarDiffManager:
         inactivity_multiples: float = 6.0,
         state_path: str | None = None,
         warm_start_minutes: int = 0,
+        start_difficulty: float | None = None,
     ):
         self.target = target_share_time
         self.min_diff = min_difficulty
         self.max_diff = max_difficulty
+        # Start difficulty defaults to a reasonable value for faster convergence
+        self.start_diff = start_difficulty if start_difficulty is not None else min_difficulty
         self.retarget_shares = retarget_shares
         self.retarget_time = retarget_time
         self.max_window_shares = max_window_shares
@@ -55,6 +58,7 @@ class VarDiffManager:
         self.inactivity_multiples = inactivity_multiples
         self.state_path = state_path
         self.warm_start_minutes = warm_start_minutes
+        self.chain_headroom: float = 1.0  # Default headroom, can be overridden
         self._lock = asyncio.Lock()
         self.miners: Dict[str, MinerState] = {}
         if self.state_path:
@@ -62,7 +66,7 @@ class VarDiffManager:
 
     async def _init_miner(self, miner_id: str):
         self.miners[miner_id] = MinerState(
-            difficulty=self.min_diff,
+            difficulty=self.start_diff,
             shares=deque(maxlen=self.max_window_shares),
             last_retarget=time.time(),
         )
@@ -188,6 +192,8 @@ class VarDiffManager:
 
     # --- Persistence & Introspection ---
     def _save_state(self):
+        if not self.state_path:
+            return
         try:
             import json, os
 
@@ -210,6 +216,8 @@ class VarDiffManager:
             logger.debug("Failed to save vardiff state: %s", e)
 
     def _load_state(self):
+        if not self.state_path:
+            return
         try:
             import json, os
 

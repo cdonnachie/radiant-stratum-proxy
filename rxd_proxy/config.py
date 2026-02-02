@@ -22,7 +22,7 @@ class Settings:
     verbose: bool = False  # Deprecated: use log_level instead
     enable_zmq: bool = False
     rxd_zmq_endpoint: str = ""
-    share_difficulty_divisor: float = 1000.0
+    static_share_difficulty: float = 1.0
     discord_webhook: str = ""
     telegram_bot_token: str = ""
     telegram_chat_id: str = ""
@@ -32,9 +32,10 @@ class Settings:
     # Variable difficulty (per-miner) settings
     enable_vardiff: bool = False
     vardiff_target_interval: float = 15.0
-    # Adjusted defaults for RXD difficulty regime
-    vardiff_min_difficulty: float = 0.00001
-    vardiff_max_difficulty: float = 1000.0
+    # Adjusted defaults for RXD GPU/ASIC mining (SHA512/256d)
+    vardiff_min_difficulty: float = 100.0       # Prevents share spam
+    vardiff_max_difficulty: float = 10000000.0  # 10M for large ASIC farms
+    vardiff_start_difficulty: float = 10000.0   # Good starting point for GPUs
     vardiff_retarget_shares: int = 20
     vardiff_retarget_time: float = 300.0
     vardiff_up_step: float = 2.0
@@ -71,12 +72,19 @@ class Settings:
 
         # ZMQ Configuration - read at instance creation time
         self.enable_zmq = os.getenv("ENABLE_ZMQ", "true").lower() == "true"
-        self.rxd_zmq_endpoint = os.getenv("RXD_ZMQ_ENDPOINT", "tcp://radiant:28332")
-        # Share difficulty divisor: share_diff = network_diff / divisor
-        # Higher value = easier shares = more frequent submissions
-        # 1.0 = only blocks, 1000.0 = balanced, 10000.0 = very frequent
-        self.share_difficulty_divisor = float(
-            os.getenv("SHARE_DIFFICULTY_DIVISOR", "1000.0")
+        # Auto-select ZMQ port based on network if not explicitly set
+        zmq_endpoint_env = os.getenv("RXD_ZMQ_ENDPOINT", "")
+        if zmq_endpoint_env:
+            self.rxd_zmq_endpoint = zmq_endpoint_env
+        else:
+            # Use testnet port (39332) or mainnet port (29332) based on TESTNET setting
+            default_zmq_port = "39332" if self.testnet else "29332"
+            self.rxd_zmq_endpoint = f"tcp://radiant:{default_zmq_port}"
+        # Static share difficulty (used when VarDiff is disabled)
+        # This is the exact difficulty value miners will use
+        # GPU default: 1.0, ASIC default: 512.0
+        self.static_share_difficulty = float(
+            os.getenv("STATIC_SHARE_DIFFICULTY", "1.0")
         )
         # Notification settings
         self.discord_webhook = os.getenv("DISCORD_WEBHOOK_URL", "")
@@ -94,11 +102,14 @@ class Settings:
             )
         except ValueError:
             self.vardiff_target_interval = 15.0
-        # Extended vardiff tunables
+        # Extended vardiff tunables - defaults tuned for GPU/ASIC mining
         self.vardiff_min_difficulty = float(
-            os.getenv("VARDIFF_MIN_DIFFICULTY", "0.00001")
+            os.getenv("VARDIFF_MIN_DIFFICULTY", "100.0")
         )
-        self.vardiff_max_difficulty = float(os.getenv("VARDIFF_MAX_DIFFICULTY", "1000.0"))
+        self.vardiff_max_difficulty = float(os.getenv("VARDIFF_MAX_DIFFICULTY", "10000000.0"))
+        self.vardiff_start_difficulty = float(
+            os.getenv("VARDIFF_START_DIFFICULTY", "10000.0")
+        )
         self.vardiff_retarget_shares = int(os.getenv("VARDIFF_RETARGET_SHARES", "20"))
         self.vardiff_retarget_time = float(os.getenv("VARDIFF_RETARGET_TIME", "300.0"))
         self.vardiff_up_step = float(os.getenv("VARDIFF_UP_STEP", "2.0"))
@@ -112,6 +123,10 @@ class Settings:
         )
         self.vardiff_inactivity_drop_factor = float(
             os.getenv("VARDIFF_INACTIVITY_DROP_FACTOR", "0.5")
+        )
+        # Starting difficulty for new miners (defaults to 1000 for faster convergence)
+        self.vardiff_start_difficulty = float(
+            os.getenv("VARDIFF_START_DIFFICULTY", "1000.0")
         )
         self.vardiff_state_path = os.getenv(
             "VARDIFF_STATE_PATH", "data/vardiff_state.json"

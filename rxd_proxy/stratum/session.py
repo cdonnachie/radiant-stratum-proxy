@@ -26,8 +26,8 @@ from . import vardiff as _vardiff_mod
 
 logger = logging.getLogger(__name__)
 
-# Hashrate tracking based on share submissions
-hashrate_tracker = {}
+# Hashrate tracking based on share submissions - initialized after class definition
+hashrate_tracker: "HashrateTracker"
 
 
 async def _log_share_stats_background(
@@ -56,7 +56,7 @@ async def _record_best_share_background(
     share_difficulty: float,
     target_difficulty: float,
     timestamp: int,
-    miner_software: str = None,
+    miner_software: str | None = None,
 ):
     """Background task for recording potential best shares"""
     try:
@@ -83,8 +83,6 @@ async def _record_best_share_background(
     except Exception as e:
         logger.error(f"Error in best share background task: {e}")
         # Don't let best share tracking interfere with mining
-    except Exception as e:
-        logger.debug("Background share stats logging failed: %s", e)
 
 
 class HashrateTracker:
@@ -273,7 +271,7 @@ class StratumSession(RPCSession):
         state: TemplateState,
         testnet: bool,
         node_url: str,
-        share_difficulty_divisor: float,
+        static_share_difficulty: float,
         notification_manager,
         transport,
     ):
@@ -285,25 +283,25 @@ class StratumSession(RPCSession):
         self._testnet = testnet
         self._notification_manager = notification_manager
 
-        # Validate and clamp share_difficulty_divisor
-        # Min: 1.0 (shares equal to block difficulty)
-        # Max: 10000.0 (very easy shares, reasonable upper limit)
-        if share_difficulty_divisor < 1.0:
+        # Validate and clamp static_share_difficulty
+        # Min: 0.001 (very easy, for testing)
+        # Max: 10000000.0 (10M, for ASIC farms)
+        if static_share_difficulty < 0.001:
             self.logger = logging.getLogger("Stratum-Proxy")
             self.logger.warning(
-                "share_difficulty_divisor %.2f is below minimum 1.0 (block difficulty), clamping to 1.0",
-                share_difficulty_divisor,
+                "static_share_difficulty %.6f is below minimum 0.001, clamping to 0.001",
+                static_share_difficulty,
             )
-            share_difficulty_divisor = 1.0
-        elif share_difficulty_divisor > 10000.0:
+            static_share_difficulty = 0.001
+        elif static_share_difficulty > 10000000.0:
             self.logger = logging.getLogger("Stratum-Proxy")
             self.logger.warning(
-                "share_difficulty_divisor %.2f exceeds maximum 10000.0, clamping to 10000.0",
-                share_difficulty_divisor,
+                "static_share_difficulty %.2f exceeds maximum 10000000.0, clamping to 10000000.0",
+                static_share_difficulty,
             )
-            share_difficulty_divisor = 10000.0
+            static_share_difficulty = 10000000.0
 
-        self._share_difficulty_divisor = share_difficulty_divisor
+        self._static_share_difficulty = static_share_difficulty
         self._client_addr = transport._remote_address
         self._transport = transport
         self._node_url = node_url
@@ -339,7 +337,7 @@ class StratumSession(RPCSession):
                 k: v for k, v in request.args.items() if k in expected_params
             }
             # Reconstruct request with filtered parameters as a dict
-            request = Request(request.method, filtered_args, request.id)
+            request = Request(request.method, filtered_args)
 
         return await handler_invocation(handler, request)()
 
@@ -388,7 +386,7 @@ class StratumSession(RPCSession):
                 pass
 
         try:
-            wid = getattr(self, "_worker_id", None)
+            wid = getattr(self, "_worker_name", None)
             if wid:
                 hashrate_tracker.remove_worker(wid)
         except Exception as e:
@@ -397,11 +395,19 @@ class StratumSession(RPCSession):
         self._state.new_sessions.discard(self)
         self._state.all_sessions.discard(self)
 
+        # Reset payout address when all miners disconnect
+        # This allows the next miner to connect to set their address
+        if not self._state.all_sessions and not self._state.new_sessions:
+            self.logger.info("All miners disconnected - resetting payout address")
+            self._state.pub_h160 = None
+
         try:
-            await super().connection_lost()
+            result = super().connection_lost()
+            if asyncio.iscoroutine(result):
+                await result
         except TypeError:
             try:
-                super().connection_lost()
+                super().connection_lost()  # type: ignore[misc]
             except Exception as e:
                 self.logger.debug("Error calling connection_lost: %s", e)
 
@@ -519,16 +525,15 @@ class StratumSession(RPCSession):
         # If a job exists, send it right away
         job = self._state.current_job_params()
         if job:
-            base_diff = target_to_diff1(int(self._state.target, 16))
             if _vardiff_mod.vardiff_manager is not None:
                 try:
                     difficulty = await _vardiff_mod.vardiff_manager.get_difficulty(
                         self._worker_id
                     )
                 except Exception:
-                    difficulty = base_diff / self._share_difficulty_divisor
+                    difficulty = self._static_share_difficulty
             else:
-                difficulty = base_diff / self._share_difficulty_divisor
+                difficulty = self._static_share_difficulty
             self._share_difficulty = difficulty
             await self.send_notification("mining.set_difficulty", (difficulty,))
             await self.send_notification("mining.notify", job)
@@ -621,6 +626,13 @@ class StratumSession(RPCSession):
                 -32602, "Invalid request arguments - missing required parameters"
             )
 
+        # Type narrowing for Pylance - these are guaranteed non-None after the check above
+        assert worker is not None
+        assert job_id is not None
+        assert extranonce2_hex is not None
+        assert ntime_hex is not None
+        assert nonce_hex is not None
+
         # Reset activity timer on any submission
         loop = asyncio.get_event_loop()
         self._last_activity = loop.time()
@@ -647,6 +659,15 @@ class StratumSession(RPCSession):
         ):
             self.logger.error("Coinbase parts not ready")
             return False
+
+        # Additional state validation for header building
+        if not (prevHash_header_snapshot and bits_le_snapshot and state.target):
+            self.logger.error("Header state not ready")
+            return False
+
+        # Type narrowing for Pylance - snapshots are guaranteed non-None after checks
+        assert coinbase1_nowit_snapshot is not None
+        assert coinbase2_nowit_snapshot is not None
 
         en1 = bytes.fromhex(self._extranonce1 or "")
         en2 = bytes.fromhex(extranonce2_hex)
@@ -757,6 +778,12 @@ class StratumSession(RPCSession):
                 await _vardiff_mod.vardiff_manager.record_share(
                     worker, share_difficulty=sent_diff
                 )
+                # Check if VarDiff updated difficulty and push to miner if changed
+                new_diff = await _vardiff_mod.vardiff_manager.get_difficulty(worker)
+                if abs(new_diff - sent_diff) / max(sent_diff, 1e-9) >= 0.05:
+                    self._share_difficulty = new_diff
+                    await self.send_notification("mining.set_difficulty", (new_diff,))
+                    self.logger.debug("VarDiff adjusted difficulty for %s: %.4f -> %.4f", worker, sent_diff, new_diff)
             except Exception as e:
                 self.logger.debug("Failed to record share for vardiff: %s", e)
 
@@ -898,6 +925,7 @@ class StratumSession(RPCSession):
                     if result is None or result == "":
                         block_accepted = True
                         block_height_for_notif = state.height
+                        assert block_height_for_notif is not None  # Type narrowing
 
                         # Record as best share since block was accepted
                         asyncio.create_task(
@@ -915,7 +943,7 @@ class StratumSession(RPCSession):
                         )
 
                 # Send notifications after submission
-                if block_accepted:
+                if block_accepted and block_height_for_notif is not None:
                     await self._notification_manager.notify_block_found(
                         chain="RXD",
                         height=block_height_for_notif,
